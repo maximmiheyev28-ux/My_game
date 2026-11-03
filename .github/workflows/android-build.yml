@@ -1,0 +1,98 @@
+name: Android APK build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'build-request.txt'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-arm64-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Restore Godot project sources
+        run: python3 restore_source.py
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android platform and build tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.1.0" \
+            "cmdline-tools;latest" \
+            "ndk;29.0.14206865" \
+            "cmake;3.22.1"
+          set +o pipefail
+          yes | sdkmanager --licenses >/dev/null
+          set -o pipefail
+      - name: Download Godot 4.7.2 and matching export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/godot" "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/godot/editor.zip" \
+            "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/godot/templates.tpz" \
+            "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/godot/editor.zip" -d "$RUNNER_TEMP/godot/editor"
+          unzip -q "$RUNNER_TEMP/godot/templates.tpz" -d "$RUNNER_TEMP/godot/templates"
+          GODOT_BIN="$(find "$RUNNER_TEMP/godot/editor" -maxdepth 2 -type f -name 'Godot_v4.7.2*' | head -n 1)"
+          test -n "$GODOT_BIN"
+          chmod +x "$GODOT_BIN"
+          echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
+          cp -a "$RUNNER_TEMP/godot/templates/templates/." "$HOME/.local/share/godot/export_templates/4.7.2.stable/"
+          test -s "$HOME/.local/share/godot/export_templates/4.7.2.stable/android_debug.apk"
+      - name: Configure Android debug signing and SDK paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.config/godot" "$HOME/.android"
+          keytool -genkeypair -noprompt -v -keystore "$HOME/.android/debug.keystore" \
+            -storepass android -alias androiddebugkey -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -validity 10000
+          {
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/.android/debug.keystore"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android"
+          } >> "$GITHUB_ENV"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+      - name: Validate project files
+        run: python3 tools/validate_project.py
+      - name: Import, parse and export ARM64 debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --editor --quit
+          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-debug "Android APK (ARM64)" build/PosledniySignal-debug.apk
+          test -s build/PosledniySignal-debug.apk
+          "$ANDROID_HOME/build-tools/36.1.0/apksigner" verify --verbose build/PosledniySignal-debug.apk
+          file build/PosledniySignal-debug.apk
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PosledniySignal-Android-ARM64-debug
+          path: build/PosledniySignal-debug.apk
+          if-no-files-found: error
+          retention-days: 30
