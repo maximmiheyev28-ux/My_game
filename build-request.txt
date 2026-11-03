@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request (retry with Pillow validation dependency)
+Android ARM64 debug APK build request (Godot 4.7.2 GDScript type fix)
