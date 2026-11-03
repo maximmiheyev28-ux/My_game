@@ -3,10 +3,14 @@
 from __future__ import annotations
 import base64, io, tarfile
 from pathlib import Path
+
 ROOT = Path(__file__).resolve().parent
 parts = sorted((ROOT / ".source").glob("part-*.b64"))
-if not parts:
-    raise SystemExit("No .source/part-*.b64 archive parts found.")
+expected = [f"part-{i:03d}.b64" for i in range(1, 38)]
+present = {p.name for p in parts}
+missing = [name for name in expected if name not in present]
+if missing:
+    raise SystemExit("Source archive incomplete. Missing: " + ", ".join(missing))
 encoded = "".join(p.read_text(encoding="ascii").strip() for p in parts)
 try:
     data = base64.b64decode(encoded, validate=True)
