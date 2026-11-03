@@ -34,6 +34,18 @@ try:
             if target != ROOT and ROOT not in target.parents:
                 raise SystemExit(f"Unsafe archive path: {member.name}")
         archive.extractall(ROOT, members=members)
+
+    # Godot 4.7.2 requires an explicit Dictionary type for this inferred value.
+    game_state = ROOT / "scripts" / "game" / "game_state.gd"
+    if game_state.is_file():
+        script = game_state.read_text(encoding="utf-8")
+        old_line = "var data := CHOICES[clampi(chapter_index, 0, CHOICES.size()-1)]"
+        new_line = "var data: Dictionary = CHOICES[clampi(chapter_index, 0, CHOICES.size()-1)]"
+        if old_line in script:
+            game_state.write_text(script.replace(old_line, new_line, 1), encoding="utf-8")
+        elif new_line not in script:
+            raise SystemExit("Godot 4.7.2 compatibility patch could not find the expected choice data declaration.")
+
 except Exception as exc:
     raise SystemExit(f"Could not restore source archive: {exc}") from exc
 
