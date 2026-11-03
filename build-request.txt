@@ -1,2 +1,1 @@
-Android ARM64 debug APK build request
-Source archive SHA256: d946fe561580ac6dbe07200fd1e9d7c472114bfc2b20db6dfed4556ebd95dea6
+Android ARM64 debug APK build request (retry after Android SDK setup fix)
