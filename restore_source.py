@@ -35,16 +35,57 @@ try:
                 raise SystemExit(f"Unsafe archive path: {member.name}")
         archive.extractall(ROOT, members=members)
 
-    # Godot 4.7.2 requires an explicit Dictionary type for this inferred value.
+    def replace_once(path: Path, old_text: str, new_text: str, description: str) -> None:
+        current = path.read_text(encoding="utf-8")
+        if old_text in current:
+            path.write_text(current.replace(old_text, new_text, 1), encoding="utf-8")
+        elif new_text not in current:
+            raise SystemExit(f"Could not apply compatibility patch: {description}")
+
+    # Godot 4.7.2 needs an explicit type for this choice dictionary.
     game_state = ROOT / "scripts" / "game" / "game_state.gd"
-    if game_state.is_file():
-        script = game_state.read_text(encoding="utf-8")
-        old_line = "var data := CHOICES[clampi(chapter_index, 0, CHOICES.size()-1)]"
-        new_line = "var data: Dictionary = CHOICES[clampi(chapter_index, 0, CHOICES.size()-1)]"
-        if old_line in script:
-            game_state.write_text(script.replace(old_line, new_line, 1), encoding="utf-8")
-        elif new_line not in script:
-            raise SystemExit("Godot 4.7.2 compatibility patch could not find the expected choice data declaration.")
+    replace_once(
+        game_state,
+        "var data := CHOICES[clampi(chapter_index, 0, CHOICES.size()-1)]",
+        "var data: Dictionary = CHOICES[clampi(chapter_index, 0, CHOICES.size()-1)]",
+        "choice dictionary type",
+    )
+
+    # Keep the standard prebuilt APK template: SDK overrides require Gradle Build.
+    export_preset = ROOT / "export_presets.cfg"
+    preset_text = export_preset.read_text(encoding="utf-8")
+    preset_lines = [
+        line for line in preset_text.splitlines(keepends=True)
+        if not line.startswith("gradle_build/min_sdk=")
+        and not line.startswith("gradle_build/target_sdk=")
+    ]
+    preset_text = "".join(preset_lines)
+    if "gradle_build/use_gradle_build=false" not in preset_text:
+        raise SystemExit("Android preset is not configured for the prebuilt APK template.")
+    export_preset.write_text(preset_text, encoding="utf-8")
+
+    # Android export requires ETC2/ASTC textures on Linux hosts.
+    project_config = ROOT / "project.godot"
+    config_text = project_config.read_text(encoding="utf-8")
+    rendering_header = "[rendering]\n"
+    texture_setting = "textures/vram_compression/import_etc2_astc=true\n"
+    if texture_setting not in config_text:
+        if rendering_header not in config_text:
+            raise SystemExit("Could not find the [rendering] section in project.godot.")
+        config_text = config_text.replace(rendering_header, rendering_header + texture_setting, 1)
+        project_config.write_text(config_text, encoding="utf-8")
+
+    # Update the offline validator to check the prebuilt-template configuration.
+    validator = ROOT / "tools" / "validate_project.py"
+    replace_once(
+        validator,
+        'if \'gradle_build/min_sdk=24\' not in export_config:\n    errors.append("Android minimum SDK setting is not 24")\n',
+        'if "gradle_build/use_gradle_build=false" not in export_config:\n'
+        '    errors.append("Android export should use the prebuilt APK template")\n'
+        'if "gradle_build/min_sdk=" in export_config or "gradle_build/target_sdk=" in export_config:\n'
+        '    errors.append("SDK level overrides require Gradle Build and must be omitted for the prebuilt template")\n',
+        "Android preset validation rule",
+    )
 
 except Exception as exc:
     raise SystemExit(f"Could not restore source archive: {exc}") from exc
