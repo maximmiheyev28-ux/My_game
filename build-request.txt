@@ -1,2 +1,1 @@
-Android ARM64 debug APK build request — v1.0.0 Pixel Art & Kinetic Stasis overhaul
-Source SHA256: 70e682c9cb9ddfc3aa0cca5337ab383a60be1e1b84a6a024a6d3e9ec0b0dd9f8
+Android ARM64 debug APK build request — v1.0.0 cutscene scope fix
