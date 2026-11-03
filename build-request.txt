@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request (Godot 4.7.2 GDScript type fix)
+Android ARM64 debug APK build request (Android preset compatibility fixes)
