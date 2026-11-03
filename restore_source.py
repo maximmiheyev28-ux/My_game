@@ -15,7 +15,7 @@ if full_archive.is_file():
     source_label = full_archive.name
 else:
     parts = sorted((ROOT / ".source").glob("part-*.b64"))
-    expected = [f"part-{i:03d}.b64" for i in range(1, 38)]
+    expected = [f"part-{i:03d}.b64" for i in range(1, 53)]
     present = {part.name for part in parts}
     missing = [name for name in expected if name not in present]
     if missing:
