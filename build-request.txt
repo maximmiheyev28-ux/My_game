@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request (retry after Android SDK setup fix)
+Android ARM64 debug APK build request (retry with Pillow validation dependency)
