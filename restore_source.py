@@ -87,6 +87,15 @@ try:
         "Android preset validation rule",
     )
 
+    # The cinematic title references the chapter field stored on the director.
+    cutscene = ROOT / "scripts" / "ui" / "cinematic_cutscene.gd"
+    replace_once(
+        cutscene,
+        'chapter_tag.text = "КОНТУР // КИНЕМАТОГРАФИЧЕСКАЯ ЗАПИСЬ  %02d" % (chapter+1)',
+        'chapter_tag.text = "КОНТУР // КИНЕМАТОГРАФИЧЕСКАЯ ЗАПИСЬ  %02d" % (_chapter+1)',
+        "cinematic chapter title scope",
+    )
+
 except Exception as exc:
     raise SystemExit(f"Could not restore source archive: {exc}") from exc
 
