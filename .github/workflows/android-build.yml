@@ -98,6 +98,20 @@ jobs:
           python3 enhance_project.py
 
 
+      - name: Package restored project for visual overhaul
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          zip -qr "$RUNNER_TEMP/PosledniySignal-source.zip" . \
+            -x ".git/*" ".godot/*" "build/*" ".source/*"
+
+      - name: Upload restored source inspection artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PosledniySignal-source-inspection
+          path: ${{ runner.temp }}/PosledniySignal-source.zip
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Validate project files
         run: python3 tools/validate_project.py
       - name: Import, parse and export ARM64 debug APK
