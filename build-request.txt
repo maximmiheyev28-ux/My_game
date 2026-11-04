@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request — v1.0.0 cutscene scope fix
+Android ARM64 debug APK build request — v1.1.0: reference-inspired pixel art, expanded animations, original soundtrack, compact non-damaging hero-centered Stasis
