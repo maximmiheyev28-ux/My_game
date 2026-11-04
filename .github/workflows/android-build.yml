@@ -84,8 +84,19 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install project validation dependency
-        run: python -m pip install --disable-pip-version-check Pillow
+      - name: Install FFmpeg for original soundtrack encoding
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install project validation and asset generation dependencies
+        run: python -m pip install --disable-pip-version-check Pillow numpy
+
+      - name: Generate enhanced pixel art, animations and soundtrack
+        run: |
+          python3 -m py_compile enhance_project.py
+          python3 enhance_project.py
+
 
       - name: Validate project files
         run: python3 tools/validate_project.py
