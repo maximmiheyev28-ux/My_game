@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request — v1.2.1 full pixel-art rework with camera parallax layers; original synthwave OST; six-frame animations; safe 78px Stasis
+Android ARM64 debug APK build request — v1.3.0 character and environment art rework: 52 individually hand-posed hero frames, enlarged silhouette, richly textured panoramas, detailed animated parallax foreground, original synthwave OST, safe local 78px Stasis
