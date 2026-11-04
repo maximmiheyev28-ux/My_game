@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request — v1.2.0 full pixel-art rework, expanded six-frame combat animations, new OST and non-damaging local Stasis
+Android ARM64 debug APK build request — v1.2.1 full pixel-art rework with camera parallax layers; original synthwave OST; six-frame animations; safe 78px Stasis
