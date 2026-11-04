@@ -108,6 +108,9 @@ jobs:
           python3 -m py_compile visual_upgrade_v2.py
           python3 visual_upgrade_v2.py
 
+      - name: Add separate parallax foreground art layers
+        run: python3 .source/visual-v2/parallax_upgrade.py
+
 
       - name: Package restored project for visual overhaul
         run: |
