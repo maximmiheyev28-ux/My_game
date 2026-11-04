@@ -117,6 +117,10 @@ if enhancement_parts:
     helper_sha256 = hashlib.sha256(helper_bytes).hexdigest()
     if len(helper_bytes) != 101130 or helper_sha256 != "3900b793d6b5cd9ac6be277af118521035b567902d1beb4edd6fd80003b0fc13":
         raise SystemExit("Enhancement generator checksum mismatch.")
-    (ROOT / "enhance_project.py").write_bytes(helper_bytes)
+    helper_text = helper_bytes.decode("utf-8")
+    # GDScript uses % for integer remainder; // is not a GDScript operator.
+    helper_text = helper_text.replace("if (x//48)%2==0", "if (int(x / 48.0) % 2) == 0")
+    (ROOT / "enhance_project.py").write_text(helper_text, encoding="utf-8")
     print(f"Restored visual/audio generator: {len(helper_bytes)} bytes; SHA-256 verified.")
+    print("Applied GDScript platform-renderer syntax fix.")
 
