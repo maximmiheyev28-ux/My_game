@@ -111,6 +111,24 @@ jobs:
       - name: Add separate parallax foreground art layers
         run: python3 .source/visual-v2/parallax_upgrade.py
 
+      - name: Apply v1.3 detailed character and environment art
+        run: |
+          set -euo pipefail
+          python3 -m py_compile visual_upgrade_v3.py
+          python3 visual_upgrade_v3.py
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib
+          root=Path("assets/characters")
+          frames=[root/f"player_run_{i}.png" for i in range(10)]
+          digests={hashlib.sha256(p.read_bytes()).hexdigest() for p in frames}
+          assert len(digests)>=8, f"Run animation has only {len(digests)} distinct frames"
+          assert all(Image.open(p).size==(80,96) for p in frames), "Unexpected hero frame dimensions"
+          assert all((Path("assets/backgrounds")/f"foreground_{i}.png").is_file() for i in range(6))
+          print(f"ART QUALITY CHECK: {len(digests)} unique run frames; six foreground layers verified.")
+          PY
+
 
       - name: Package restored project for visual overhaul
         run: |
