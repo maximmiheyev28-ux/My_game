@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request — v1.1.0 platform renderer parser fix
+Android ARM64 debug APK build request — v1.1.0 kinetic debris parser fix
