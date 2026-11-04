@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import base64
 import io
+import gzip
+import hashlib
 import tarfile
 from pathlib import Path
 
@@ -100,3 +102,21 @@ except Exception as exc:
     raise SystemExit(f"Could not restore source archive: {exc}") from exc
 
 print(f"Restored {len(members)} project entries from {source_label}.")
+
+# Reassemble and verify the compressed visual/audio/gameplay generator.
+enhancement_dir = ROOT / ".source" / "enhance"
+enhancement_parts = sorted(enhancement_dir.glob("part-*.b64"))
+if enhancement_parts:
+    expected_parts = [f"part-{i:03d}.b64" for i in range(1, 8)]
+    present = {part.name for part in enhancement_parts}
+    missing = [name for name in expected_parts if name not in present]
+    if missing:
+        raise SystemExit("Enhancement generator incomplete. Missing: " + ", ".join(missing))
+    packed_text = "".join((enhancement_dir / name).read_text(encoding="ascii").strip() for name in expected_parts)
+    helper_bytes = gzip.decompress(base64.b64decode(packed_text, validate=True))
+    helper_sha256 = hashlib.sha256(helper_bytes).hexdigest()
+    if len(helper_bytes) != 101130 or helper_sha256 != "3900b793d6b5cd9ac6be277af118521035b567902d1beb4edd6fd80003b0fc13":
+        raise SystemExit("Enhancement generator checksum mismatch.")
+    (ROOT / "enhance_project.py").write_bytes(helper_bytes)
+    print(f"Restored visual/audio generator: {len(helper_bytes)} bytes; SHA-256 verified.")
+
