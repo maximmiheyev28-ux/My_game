@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request — v1.1.0: reference-inspired pixel art, expanded animations, original soundtrack, compact non-damaging hero-centered Stasis
+Android ARM64 debug APK build request — v1.1.0 platform renderer parser fix
