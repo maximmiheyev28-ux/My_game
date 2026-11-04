@@ -120,6 +120,19 @@ if enhancement_parts:
     helper_text = helper_bytes.decode("utf-8")
     # GDScript uses % for integer remainder; // is not a GDScript operator.
     helper_text = helper_text.replace("if (x//48)%2==0", "if (int(x / 48.0) % 2) == 0")
+    # Kinetic rain droplets have no faction flag; only reflected bullets use friendly.
+    old_debris_guard = """    if frozen or friendly or not is_inside_tree():
+        return
+    frozen = true
+    add_to_group("stasis_frozen")
+    stored_velocity = velocity
+    velocity = Vector2.ZERO
+    set_physics_process(false)
+    modulate = Color(0.52,0.92,1.0,1.0)"""
+    new_debris_guard = old_debris_guard.replace("if frozen or friendly or", "if frozen or")
+    if old_debris_guard not in helper_text:
+        raise SystemExit("Kinetic-debris guard patch target not found.")
+    helper_text = helper_text.replace(old_debris_guard, new_debris_guard, 1)
     (ROOT / "enhance_project.py").write_text(helper_text, encoding="utf-8")
     print(f"Restored visual/audio generator: {len(helper_bytes)} bytes; SHA-256 verified.")
     print("Applied GDScript platform-renderer syntax fix.")
