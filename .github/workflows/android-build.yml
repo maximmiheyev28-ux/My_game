@@ -97,6 +97,17 @@ jobs:
           python3 -m py_compile enhance_project.py
           python3 enhance_project.py
 
+      - name: Install handcrafted v1.2 pixel-art, animation and OST overhaul
+        run: |
+          set -euo pipefail
+          test -s .source/visual-v2/part-001.b64
+          test -s .source/visual-v2/part-002.b64
+          test -s .source/visual-v2/part-003.b64
+          test -s .source/visual-v2/part-004.b64
+          cat .source/visual-v2/part-*.b64 | base64 --decode | gzip -dc > visual_upgrade_v2.py
+          python3 -m py_compile visual_upgrade_v2.py
+          python3 visual_upgrade_v2.py
+
 
       - name: Package restored project for visual overhaul
         run: |
