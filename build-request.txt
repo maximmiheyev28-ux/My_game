@@ -1,1 +1,1 @@
-Source export request for v1.1 visual overhaul
+Android ARM64 debug APK build request — v1.2.0 full pixel-art rework, expanded six-frame combat animations, new OST and non-damaging local Stasis
