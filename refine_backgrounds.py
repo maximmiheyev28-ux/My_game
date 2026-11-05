@@ -35,7 +35,7 @@ def panorama(ch):
     d=ImageDraw.Draw(im,"RGBA"); a,b=col(pink),col(cyan)
 
     # Distant light and sparse stars.
-    for _ in range(260):
+    for _ in range(190):
         x,y=rng.randrange(W),rng.randrange(12,178)
         d.rectangle((x,y,x+rng.choice((1,1,2)),y+1),fill=(*rng.choice((a,b,(155,170,200))),rng.randrange(35,105)))
     if ch in (0,3,5):
@@ -56,10 +56,10 @@ def panorama(ch):
         roof=rng.randrange(4)
         if roof==0: d.rectangle((x+w//3,base-h-9,x+2*w//3,base-h+2),fill=(*shade,245))
         elif roof==1: d.line((x+w//2,base-h,x+w//2,base-h-18),fill=(*b,130),width=1)
-        for _ in range(rng.randint(2,6)):
+        for _ in range(rng.randint(3,7)):
             wx=x+rng.randint(7,max(8,w-8)); wy=base-rng.randint(13,max(14,h-6))
             wc=a if rng.random()<.24 else b
-            d.rectangle((wx,wy,wx+2,wy+5),fill=(*wc,rng.randint(95,175)))
+            d.rectangle((wx,wy,wx+3,wy+6),fill=(*wc,rng.randint(115,190)))
         x+=w+rng.randint(12,25)
 
     # Middle skyline: darker blocks create clear depth behind the combat plane.
@@ -68,10 +68,20 @@ def panorama(ch):
         w=rng.randint(48,104); h=rng.randint(32,82); base=278+rng.randint(-3,3)
         shade=mix(col(near),col(mid),.48)
         d.rectangle((x,base-h,x+w,base),fill=(*shade,255))
-        for _ in range(rng.randint(1,4)):
+        for _ in range(rng.randint(1,3)):
             wx=x+rng.randint(6,max(7,w-8)); wy=base-rng.randint(10,max(11,h-5))
-            d.rectangle((wx,wy,wx+2,wy+4),fill=(*rng.choice((a,b)),rng.randint(80,140)))
+            d.rectangle((wx,wy,wx+3,wy+5),fill=(*rng.choice((a,b)),rng.randint(90,150)))
         x+=w+rng.randint(25,48)
+
+    # A few readable signs and facade light strips add scale without filling every wall.
+    for seg in (1, 4):
+        sx = seg * 700
+        bx = sx + rng.randint(170, 420)
+        by = rng.randint(176, 205)
+        d.rectangle((bx, by, bx+58, by+22), fill=(7, 10, 24, 245), outline=(*b, 150), width=1)
+        d.rectangle((bx+5, by+5, bx+53, by+8), fill=(*a, 180))
+        d.rectangle((bx+5, by+13, bx+33, by+16), fill=(*b, 145))
+        d.line((bx+5, by+20, bx+50, by+20), fill=(*a, 80), width=1)
 
     # Chapter landmarks vary by section instead of repeating a single prop six times.
     for seg in range(6):
@@ -132,7 +142,7 @@ def panorama(ch):
     d.rectangle((0,278,W,H),fill=(5,8,18,255))
     d.line((0,278,W,278),fill=(*b,145),width=2)
     d.line((0,283,W,283),fill=(*a,42),width=1)
-    for _ in range(430):
+    for _ in range(520):
         x,y=rng.randrange(W),rng.randrange(286,H); length=rng.randint(4,34)
         cc=a if rng.random()<.43 else b
         d.line((x,y,min(W-1,x+length),y),fill=(*cc,rng.randint(35,95)),width=1)
@@ -164,6 +174,40 @@ def foreground(ch):
             x=sx+rng.randint(20,680); y=rng.randint(120,260)
             d.rectangle((x,y,x+1,y+2),fill=(*a,70))
     im.save(OUT/f"foreground_{ch}.png",optimize=True)
+
+
+def patch_source(path, replacements):
+    source = path.read_text(encoding="utf-8")
+    for old, new in replacements:
+        count = source.count(old)
+        if count != 1:
+            raise RuntimeError(f"Expected one source anchor in {path}: {old!r}; found {count}")
+        source = source.replace(old, new)
+    path.write_text(source, encoding="utf-8")
+
+# Reduce ambient motion density while keeping rain, drifting petals, and animated lights.
+patch_source(ROOT / "scripts/fx/background_motion.gd", [
+    ("range(210)", "range(110)"),
+    ("range(58)", "range(28)"),
+    ("range(84)", "range(48)"),
+    ("range(24)", "range(14)"),
+    ("0.10 + 0.18 *", "0.07 + 0.11 *"),
+    ("0.54 + 0.28 *", "0.40 + 0.18 *"),
+    ("0.018 + 0.018 *", "0.012 + 0.012 *"),
+    ("flicker * 0.36", "flicker * 0.25"),
+    ("flicker * 0.34", "flicker * 0.23"),
+    ("range(22)", "range(14)"),
+    ("0.06 + 0.12 *", "0.04 + 0.08 *"),
+])
+patch_source(ROOT / "scripts/fx/cinematic_fx.gd", [
+    ("range(72)", "range(40)"),
+    ("range(10)", "range(6)"),
+    ("0.12 + 0.22 *", "0.08 + 0.14 *"),
+    ("Color(0.4,0.72,1.0,0.025)", "Color(0.4,0.72,1.0,0.016)"),
+])
+patch_source(ROOT / "scripts/levels/level.gd", [
+    ("for drop_index in range(17):", "for drop_index in range(10):"),
+])
 
 for chapter in range(6):
     panorama(chapter)
