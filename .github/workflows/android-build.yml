@@ -128,6 +128,8 @@ jobs:
           python3 visual_upgrade_v3.py
           python3 -m py_compile refine_backgrounds.py
           python3 refine_backgrounds.py
+          python3 -m py_compile refine_enemy_ai.py
+          python3 refine_enemy_ai.py
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
@@ -148,6 +150,9 @@ jobs:
           cinematic=Path("scripts/fx/cinematic_fx.gd").read_text(encoding="utf-8")
           assert "range(40)" in cinematic and "range(6)" in cinematic, "Cinematic particle density regression"
           assert "for drop_index in range(10):" in Path("scripts/levels/level.gd").read_text(encoding="utf-8"), "Environmental debris density regression"
+          enemy_source=Path("scripts/enemies/enemy.gd").read_text(encoding="utf-8")
+          assert "func _begin_attack(" in enemy_source and "_attack_windup > 0.0" in enemy_source, "Enemy telegraph regression"
+          assert '_begin_attack("shoot", target_position, 0.46)' in enemy_source, "Shooter warning window regression"
           luminance=[]
           for chapter in range(6):
               image=np.asarray(Image.open(Path("assets/backgrounds")/f"act_{chapter}.png").convert("RGB"),dtype=np.float32)
