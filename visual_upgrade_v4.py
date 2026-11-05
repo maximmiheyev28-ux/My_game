@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """v1.4 cinematic art pass for Последний сигнал.
 
-Installs six original, chapter-specific pixel-art backdrops and wires them into
-chapter intros and the title screen while retaining panorama fallbacks.
+Installs two original pixel-art atlases containing six chapter-specific
+backdrops and wires them into chapter intros and the title screen.
 """
 from __future__ import annotations
 
@@ -32,12 +32,12 @@ def patch_once(path: Path, old: str, new: str, label: str) -> None:
 
 
 def main() -> None:
-    for chapter in range(6):
-        image_path = CINEMATICS / f"chapter_{chapter:02d}.png"
+    for strip_index in range(2):
+        image_path = CINEMATICS / f"cutscene_strip_{strip_index}.png"
         require_file(image_path)
         with Image.open(image_path) as image:
-            if image.size != (640, 360):
-                raise RuntimeError(f"Unexpected cinematic dimensions for {image_path}: {image.size}")
+            if image.size != (1920, 360):
+                raise RuntimeError(f"Unexpected cinematic atlas dimensions for {image_path}: {image.size}")
             if image.mode not in ("P", "RGB", "RGBA"):
                 raise RuntimeError(f"Unsupported image mode for {image_path}: {image.mode}")
 
@@ -47,10 +47,16 @@ def main() -> None:
     atlas.region = Rect2(source_x, 0, 640, 360)
     _background = TextureRect.new()
     _background.texture = atlas'''
-    cutscene_new = '''    var cinematic_path := "res://assets/cinematics/chapter_%02d.png" % _chapter
+    cutscene_new = '''    var strip_index := 0 if _chapter < 3 else 1
+    var local_chapter := _chapter % 3
+    var cinematic_path := "res://assets/cinematics/cutscene_strip_%d.png" % strip_index
     var cinematic_texture: Texture2D
     if ResourceLoader.exists(cinematic_path):
-        cinematic_texture = load(cinematic_path) as Texture2D
+        var cinematic_atlas := load(cinematic_path) as Texture2D
+        var cinematic_region := AtlasTexture.new()
+        cinematic_region.atlas = cinematic_atlas
+        cinematic_region.region = Rect2(float(local_chapter) * 640.0, 0.0, 640.0, 360.0)
+        cinematic_texture = cinematic_region
     else:
         var atlas := AtlasTexture.new()
         atlas.atlas = load("res://assets/backgrounds/act_%d.png" % _chapter)
@@ -66,10 +72,14 @@ def main() -> None:
     atlas.region = Rect2(210.0, 0.0, 640.0, 360.0)
     _background = TextureRect.new()
     _background.texture = atlas'''
-    menu_new = '''    var menu_backdrop_path := "res://assets/cinematics/chapter_01.png"
+    menu_new = '''    var menu_backdrop_path := "res://assets/cinematics/cutscene_strip_0.png"
     var menu_backdrop: Texture2D
     if ResourceLoader.exists(menu_backdrop_path):
-        menu_backdrop = load(menu_backdrop_path) as Texture2D
+        var menu_atlas := load(menu_backdrop_path) as Texture2D
+        var menu_region := AtlasTexture.new()
+        menu_region.atlas = menu_atlas
+        menu_region.region = Rect2(640.0, 0.0, 640.0, 360.0)
+        menu_backdrop = menu_region
     else:
         var atlas := AtlasTexture.new()
         atlas.atlas = load("res://assets/backgrounds/act_0.png")
@@ -92,7 +102,6 @@ def main() -> None:
         source = source.replace(drift_anchor, drift_code, 1)
     CUTSCENE_SCRIPT.write_text(source, encoding="utf-8")
 
-    # A short, restrained impact shake makes the animated sword beat read clearly.
     source = CUTSCENE_SCRIPT.read_text(encoding="utf-8")
     shake_block = '''    hit.parallel().tween_property(_rival,"position:x",525.0,0.2)
     hit.parallel().tween_property(slash,"modulate:a",0.0,0.2)
@@ -111,7 +120,6 @@ def main() -> None:
         source = source.replace(shake_block, shake_new, 1)
     CUTSCENE_SCRIPT.write_text(source, encoding="utf-8")
 
-    # Give the full-screen city art room to breathe behind the menu panel.
     menu_source = MENU_SCRIPT.read_text(encoding="utf-8")
     menu_source = menu_source.replace("_background.modulate = Color(0.78, 0.79, 0.92, 1.0)", "_background.modulate = Color(0.92, 0.93, 1.0, 1.0)")
     menu_source = menu_source.replace("veil.color = Color(0.015, 0.025, 0.045, 0.48)", "veil.color = Color(0.015, 0.025, 0.045, 0.34)")
@@ -119,10 +127,10 @@ def main() -> None:
 
     final_cutscene = CUTSCENE_SCRIPT.read_text(encoding="utf-8")
     final_menu = MENU_SCRIPT.read_text(encoding="utf-8")
-    assert "assets/cinematics/chapter_%02d.png" in final_cutscene
-    assert "assets/cinematics/chapter_01.png" in final_menu
+    assert "cutscene_strip_%d.png" in final_cutscene
+    assert "cutscene_strip_0.png" in final_menu
     assert "impact_shake" in final_cutscene
-    print("V1.4 CINEMATIC ART CHECK: six 640x360 chapter backdrops wired; menu and cutscenes use full-screen art.")
+    print("V1.4 CINEMATIC ART CHECK: two 1920x360 atlases with six 640x360 chapter scenes verified and wired.")
 
 
 if __name__ == "__main__":
