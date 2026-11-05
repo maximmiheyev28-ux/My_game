@@ -132,9 +132,9 @@ jobs:
       - name: Install v1.4 chapter-specific cinematic pixel art
         run: |
           set -euo pipefail
-          test "$(find art/cinematics -maxdepth 1 -name 'chapter_*.png' | wc -l)" -eq 6
+          test "$(find art/cinematics -maxdepth 1 -name 'cutscene_strip_*.png' | wc -l)" -eq 2
           mkdir -p assets/cinematics
-          cp art/cinematics/chapter_*.png assets/cinematics/
+          cp art/cinematics/cutscene_strip_*.png assets/cinematics/
           python3 -m py_compile visual_upgrade_v4.py
           python3 visual_upgrade_v4.py
 
