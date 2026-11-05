@@ -33,7 +33,7 @@ def patch_once(path: Path, old: str, new: str, label: str) -> None:
 
 def main() -> None:
     for strip_index in range(2):
-        image_path = CINEMATICS / f"cutscene_strip_{strip_index}.png"
+        image_path = CINEMATICS / f"cutscene_strip_{strip_index}.webp"
         require_file(image_path)
         with Image.open(image_path) as image:
             if image.size != (1920, 360):
@@ -42,14 +42,14 @@ def main() -> None:
                 raise RuntimeError(f"Unsupported image mode for {image_path}: {image.mode}")
 
     cutscene_old = '''    var atlas := AtlasTexture.new()
-    atlas.atlas = load("res://assets/backgrounds/act_%d.png" % _chapter)
+    atlas.atlas = load("res://assets/backgrounds/act_%d.webp" % _chapter)
     var source_x := mini(4200 - 640, 240 + _chapter * 545)
     atlas.region = Rect2(source_x, 0, 640, 360)
     _background = TextureRect.new()
     _background.texture = atlas'''
     cutscene_new = '''    var strip_index := 0 if _chapter < 3 else 1
     var local_chapter := _chapter % 3
-    var cinematic_path := "res://assets/cinematics/cutscene_strip_%d.png" % strip_index
+    var cinematic_path := "res://assets/cinematics/cutscene_strip_%d.webp" % strip_index
     var cinematic_texture: Texture2D
     if ResourceLoader.exists(cinematic_path):
         var cinematic_atlas := load(cinematic_path) as Texture2D
@@ -59,7 +59,7 @@ def main() -> None:
         cinematic_texture = cinematic_region
     else:
         var atlas := AtlasTexture.new()
-        atlas.atlas = load("res://assets/backgrounds/act_%d.png" % _chapter)
+        atlas.atlas = load("res://assets/backgrounds/act_%d.webp" % _chapter)
         var source_x := mini(4200 - 640, 240 + _chapter * 545)
         atlas.region = Rect2(source_x, 0, 640, 360)
         cinematic_texture = atlas
@@ -68,11 +68,11 @@ def main() -> None:
     patch_once(CUTSCENE_SCRIPT, cutscene_old, cutscene_new, "chapter-specific cinematic backdrops")
 
     menu_old = '''    var atlas := AtlasTexture.new()
-    atlas.atlas = load("res://assets/backgrounds/act_0.png")
+    atlas.atlas = load("res://assets/backgrounds/act_0.webp")
     atlas.region = Rect2(210.0, 0.0, 640.0, 360.0)
     _background = TextureRect.new()
     _background.texture = atlas'''
-    menu_new = '''    var menu_backdrop_path := "res://assets/cinematics/cutscene_strip_0.png"
+    menu_new = '''    var menu_backdrop_path := "res://assets/cinematics/cutscene_strip_0.webp"
     var menu_backdrop: Texture2D
     if ResourceLoader.exists(menu_backdrop_path):
         var menu_atlas := load(menu_backdrop_path) as Texture2D
@@ -82,7 +82,7 @@ def main() -> None:
         menu_backdrop = menu_region
     else:
         var atlas := AtlasTexture.new()
-        atlas.atlas = load("res://assets/backgrounds/act_0.png")
+        atlas.atlas = load("res://assets/backgrounds/act_0.webp")
         atlas.region = Rect2(210.0, 0.0, 640.0, 360.0)
         menu_backdrop = atlas
     _background = TextureRect.new()
@@ -127,10 +127,10 @@ def main() -> None:
 
     final_cutscene = CUTSCENE_SCRIPT.read_text(encoding="utf-8")
     final_menu = MENU_SCRIPT.read_text(encoding="utf-8")
-    assert "cutscene_strip_%d.png" in final_cutscene
-    assert "cutscene_strip_0.png" in final_menu
+    assert "cutscene_strip_%d.webp" in final_cutscene
+    assert "cutscene_strip_0.webp" in final_menu
     assert "impact_shake" in final_cutscene
-    print("V1.4 CINEMATIC ART CHECK: two 1920x360 atlases with six 640x360 chapter scenes verified and wired.")
+    print("V1.4 CINEMATIC ART CHECK: two 1920x360 WebP atlases with six 640x360 chapter scenes verified and wired.")
 
 
 if __name__ == "__main__":
