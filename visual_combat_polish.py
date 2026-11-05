@@ -75,6 +75,45 @@ patch_once(
     "enemy defeat dissolve and shard burst",
 )
 
+
+boss = ROOT / "scripts/bosses/boss.gd"
+patch_once(
+    boss,
+    """        var fade := create_tween()
+        fade.tween_property(self, "modulate:a", 0.0, 0.5)
+        fade.tween_callback(queue_free)
+""",
+    """        collision_layer = 0
+        collision_mask = 0
+        set_physics_process(false)
+        var burst := Node2D.new()
+        burst.z_index = 25
+        burst.global_position = global_position + Vector2(0.0, -48.0)
+        get_parent().add_child(burst)
+        var boss_colors := [Color(1.0,0.28,0.61), Color(0.38,0.88,1.0), Color(0.96,0.91,1.0)]
+        for i in range(16):
+            var shard := Polygon2D.new()
+            var size := 3.0 + float(i % 4)
+            shard.polygon = PackedVector2Array([Vector2(-size,-size),Vector2(size,0.0),Vector2(-1.0,size)])
+            shard.color = boss_colors[i % boss_colors.size()]
+            burst.add_child(shard)
+            var angle := TAU * float(i) / 16.0
+            var travel := Vector2(cos(angle),sin(angle)) * (24.0 + float(i % 4) * 7.0)
+            var shard_tween := shard.create_tween()
+            shard_tween.set_parallel(true)
+            shard_tween.tween_property(shard, "position", travel, 0.48).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+            shard_tween.tween_property(shard, "rotation", angle * 1.8, 0.48)
+            shard_tween.tween_property(shard, "modulate:a", 0.0, 0.48)
+        var fade := create_tween()
+        fade.set_parallel(true)
+        fade.tween_property(visual, "scale", Vector2(1.28,0.78), 0.18)
+        fade.tween_property(self, "modulate:a", 0.0, 0.48)
+        fade.chain().tween_callback(burst.queue_free)
+        fade.tween_callback(queue_free)
+""",
+    "boss defeat radial disintegration",
+)
+
 slash = ROOT / "scripts/fx/slash_effect.gd"
 patch_once(
     slash,
