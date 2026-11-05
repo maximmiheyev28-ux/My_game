@@ -30,6 +30,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Restore Godot project sources
         run: python3 restore_source.py
+      - name: Apply branch-aware narrative dialogue
+        run: python3 apply_narrative_patch.py
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
