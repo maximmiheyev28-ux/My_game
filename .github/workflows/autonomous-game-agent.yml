@@ -1,0 +1,79 @@
+name: Autonomous game development
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Optional focused task for the agent"
+        required: false
+        type: string
+  schedule:
+    - cron: "30 4 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: autonomous-game-development
+  cancel-in-progress: false
+
+jobs:
+  agent:
+    if: ${{ secrets.GEMINI_API_KEY != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create isolated work branch
+        id: branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH="ai/autonomous-${GITHUB_RUN_ID}"
+          git switch -c "$BRANCH"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Run Gemini coding agent
+        uses: google-github-actions/run-gemini-cli@v0.1.22
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          prompt: |
+            You are the autonomous development engineer for the Android Godot game «Последний сигнал».
+            Read GEMINI.md, .github/copilot-instructions.md, .github/TEAM_WORKFLOW.md and the relevant agent profile before acting.
+            Restore the real project with python3 restore_source.py before inspecting or editing project files.
+            If a task input was supplied, do that task. Otherwise select ONE highest-priority, clearly actionable defect or incomplete feature from the repository's open production issues and current source.
+            Work directly in the game source, not only documentation or CI configuration. Make a focused, reviewable improvement; preserve .source and existing working behavior. Do not fabricate missing art or claim unavailable assets exist. Do not copy Katana ZERO assets.
+            Run python3 tools/validate_project.py and relevant syntax/import checks. If Godot/Android export tooling is available in this runner, run headless import and ARM64 export; otherwise report exactly what was not run.
+            Do not change the 1–2 GB size target by adding junk or duplicate data. Report actual sizes only.
+            Do not merge to main. Leave changes in the current branch for the workflow to publish as a pull request.
+            User task: ${{ inputs.task }}
+          upload_artifacts: true
+
+      - name: Publish changes as a pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo "Agent made no repository changes; no PR will be created."
+            exit 0
+          fi
+          git add -A
+          git commit -m "AI: autonomous game development update"
+          git push --set-upstream origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "AI: autonomous game development update" \
+            --body "Automated proposal from the Gemini coding agent. Review all source changes and CI results before merging. This PR was not auto-merged."
