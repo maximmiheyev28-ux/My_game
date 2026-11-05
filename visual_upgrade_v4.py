@@ -35,7 +35,7 @@ def main() -> None:
     atlas_path = CINEMATICS / "cutscene_atlas.webp"
     require_file(atlas_path)
     with Image.open(atlas_path) as image:
-        if image.size != (1920, 720):
+        if image.size != (960, 360):
             raise RuntimeError(f"Unexpected cinematic atlas dimensions: {image.size}")
         if image.mode not in ("P", "RGB", "RGBA"):
             raise RuntimeError(f"Unsupported cinematic atlas image mode: {image.mode}")
@@ -54,7 +54,7 @@ def main() -> None:
         cinematic_region.atlas = cinematic_atlas
         var atlas_column := _chapter % 3
         var atlas_row := floori(float(_chapter) / 3.0)
-        cinematic_region.region = Rect2(float(atlas_column) * 640.0, float(atlas_row) * 360.0, 640.0, 360.0)
+        cinematic_region.region = Rect2(float(atlas_column) * 320.0, float(atlas_row) * 180.0, 320.0, 180.0)
         cinematic_texture = cinematic_region
     else:
         var atlas := AtlasTexture.new()
@@ -77,7 +77,7 @@ def main() -> None:
         var menu_atlas := load(menu_backdrop_path) as Texture2D
         var menu_region := AtlasTexture.new()
         menu_region.atlas = menu_atlas
-        menu_region.region = Rect2(640.0, 0.0, 640.0, 360.0)
+        menu_region.region = Rect2(320.0, 0.0, 320.0, 180.0)
         menu_backdrop = menu_region
     else:
         var atlas := AtlasTexture.new()
@@ -129,7 +129,7 @@ def main() -> None:
     assert "cutscene_atlas.webp" in final_cutscene
     assert "cutscene_atlas.webp" in final_menu
     assert "impact_shake" in final_cutscene
-    print("V1.4 CINEMATIC ART CHECK: one 1920x720 WebP atlas with six 640x360 chapter scenes verified and wired.")
+    print("V1.4 CINEMATIC ART CHECK: one 960x360 WebP atlas with six 320x180 chapter scenes (2x integer scale) verified and wired.")
 
 
 if __name__ == "__main__":
