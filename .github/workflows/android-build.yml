@@ -6,6 +6,26 @@ on:
     branches: [main]
     paths:
       - 'build-request.txt'
+      - '.source/**'
+      - 'scripts/**'
+      - 'scenes/**'
+      - 'assets/**'
+      - 'tools/**'
+      - '*.py'
+      - 'project.godot'
+      - 'export_presets.cfg'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/**'
+      - '.source/**'
+      - 'scripts/**'
+      - 'scenes/**'
+      - 'assets/**'
+      - 'tools/**'
+      - '*.py'
+      - 'project.godot'
+      - 'export_presets.cfg'
 
 permissions:
   contents: read
