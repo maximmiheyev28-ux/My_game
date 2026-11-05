@@ -169,4 +169,14 @@ if setting not in cfg:
     cfg = cfg.replace(rendering_header, rendering_header + setting, 1)
     project.write_text(cfg, encoding="utf-8")
 
+# Build-time asset checks: all idle poses are distinct and light textures preserve RGBA8.
+idle_images = [Image.open(CH / f"player_idle_{i}.png").convert("RGBA") for i in range(8)]
+assert len({im.tobytes() for im in idle_images}) == 8, "Idle breathing cycle has duplicate frames"
+for light_name in ("glow_cyan.png", "glow_magenta.png", "glow_warm.png"):
+    light = Image.open(FX / light_name)
+    assert light.mode == "RGBA" and light.size == (128, 128), f"Invalid light map: {light_name}"
+assert "AMBIENT_LIGHT_RIG" in level.read_text(encoding="utf-8"), "Ambient light rig not attached"
+assert "ImageTexture.create_from_image" in enemy.read_text(encoding="utf-8"), "Enemy pixel particles missing"
+assert "ImageTexture.create_from_image" in boss.read_text(encoding="utf-8"), "Boss pixel particles missing"
+
 print("v1.6: eight breathing/blinking idle frames, RGBA8 light maps, three animated neon lights, raster-pixel death sprites.")
