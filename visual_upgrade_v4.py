@@ -42,7 +42,7 @@ def main() -> None:
                 raise RuntimeError(f"Unsupported image mode for {image_path}: {image.mode}")
 
     cutscene_old = '''    var atlas := AtlasTexture.new()
-    atlas.atlas = load("res://assets/backgrounds/act_%d.webp" % _chapter)
+    atlas.atlas = load("res://assets/backgrounds/act_%d.png" % _chapter)
     var source_x := mini(4200 - 640, 240 + _chapter * 545)
     atlas.region = Rect2(source_x, 0, 640, 360)
     _background = TextureRect.new()
@@ -59,7 +59,7 @@ def main() -> None:
         cinematic_texture = cinematic_region
     else:
         var atlas := AtlasTexture.new()
-        atlas.atlas = load("res://assets/backgrounds/act_%d.webp" % _chapter)
+        atlas.atlas = load("res://assets/backgrounds/act_%d.png" % _chapter)
         var source_x := mini(4200 - 640, 240 + _chapter * 545)
         atlas.region = Rect2(source_x, 0, 640, 360)
         cinematic_texture = atlas
@@ -68,7 +68,7 @@ def main() -> None:
     patch_once(CUTSCENE_SCRIPT, cutscene_old, cutscene_new, "chapter-specific cinematic backdrops")
 
     menu_old = '''    var atlas := AtlasTexture.new()
-    atlas.atlas = load("res://assets/backgrounds/act_0.webp")
+    atlas.atlas = load("res://assets/backgrounds/act_0.png")
     atlas.region = Rect2(210.0, 0.0, 640.0, 360.0)
     _background = TextureRect.new()
     _background.texture = atlas'''
@@ -82,7 +82,7 @@ def main() -> None:
         menu_backdrop = menu_region
     else:
         var atlas := AtlasTexture.new()
-        atlas.atlas = load("res://assets/backgrounds/act_0.webp")
+        atlas.atlas = load("res://assets/backgrounds/act_0.png")
         atlas.region = Rect2(210.0, 0.0, 640.0, 360.0)
         menu_backdrop = atlas
     _background = TextureRect.new()
