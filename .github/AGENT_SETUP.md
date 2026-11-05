@@ -5,6 +5,7 @@
 - `.github/agents/pixel-art-director.agent.md` — художественное направление, оригинальный pixel art, анимации, противники и катсцены.
 - `.github/agents/godot-engineer.agent.md` — Godot 4.7.2, игровые системы, Android, производительность и сборки.
 - `.github/agents/qa-coordinator.agent.md` — независимый аудит, два QA-прохода, проверка ресурсов и релизная готовность.
+- `.github/agents/narrative-writer.agent.md` — сюжетная библия, персонажи, диалоги, ветвления, четыре концовки и производственные сценарии катсцен.
 
 Общие ограничения проекта находятся в `.github/copilot-instructions.md`. Профили созданы именно в формате `.agent.md`, который распознаётся GitHub Copilot как custom agents.
 
@@ -35,6 +36,7 @@ Workflow `.github/workflows/android-build.yml` теперь запускаетс
 - **Pixel Art Director:** [Issue #3](https://github.com/maximmiheyev28-ux/My_game/issues/3) — аудит визуала, спецификация/оригинальные ассеты vertical slice. Не меняет игровые скрипты.
 - **Godot Engineer:** [Issue #4](https://github.com/maximmiheyev28-ux/My_game/issues/4) — технический аудит и ограниченный playable vertical slice. Не редактирует арт-пакет до согласования контракта.
 - **QA Coordinator:** [Issue #5](https://github.com/maximmiheyev28-ux/My_game/issues/5) — read-only baseline-аудит и тест-план. Не меняет код и ресурсы.
+- **Narrative Writer:** [Issue #7](https://github.com/maximmiheyev28-ux/My_game/issues/7) — сюжетная библия, граф ветвлений, сценарий пролога и постановочная раскадровка катсцены.
 
 Master roadmap: [Issue #2](https://github.com/maximmiheyev28-ux/My_game/issues/2).
 
