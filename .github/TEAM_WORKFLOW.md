@@ -1,7 +1,16 @@
 # GameDev Studio — команда разработки «Последний сигнал»
 
 ## Модель работы
-Команда работает как единый процесс под координацией ChatGPT. Это роли и рабочие инструкции, а не отдельные постоянно работающие фоновые процессы.
+В репозитории есть три GitHub Copilot custom agent-профиля в формате `.agent.md`: Pixel Art Director, Godot Engineer и QA Coordinator. При включённом GitHub Copilot cloud agent они доступны облачной сессии и могут использоваться для специализированной работы/делегирования, если это поддерживается выбранным runtime.
+
+Само наличие файлов не запускает фоновую сессию. Реальная работа начинается после назначения GitHub Issue агенту Copilot (или запуска сессии через вкладку Agents) при наличии доступной платной подписки Copilot и включённого cloud agent. После старта агент создаёт reviewable pull request; CI проверяет каждый PR в main.
+
+Профили:
+- `.github/agents/pixel-art-director.agent.md`
+- `.github/agents/godot-engineer.agent.md`
+- `.github/agents/qa-coordinator.agent.md`
+
+Общие инструкции: `.github/copilot-instructions.md`. Порядок активации и ограничения описаны в `.github/AGENT_SETUP.md`.
 
 ### 1. Game Designer
 - Отвечает за художественное направление, композицию, читаемость, персонажей, противников, окружение, UI, анимации и катсцены.
