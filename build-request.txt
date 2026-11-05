@@ -1,1 +1,1 @@
-Android ARM64 debug APK build request — v1.3.0 character and environment art rework: 52 individually hand-posed hero frames, enlarged silhouette, richly textured panoramas, detailed animated parallax foreground, original synthwave OST, safe local 78px Stasis
+Android ARM64 debug APK build request — v1.4 visual art integration: add cinematic cyberpunk scene art, retain hand-posed character cycles, preserve parallax layers, validate project and export APK.
