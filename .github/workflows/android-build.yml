@@ -142,7 +142,7 @@ jobs:
           name: PosledniySignal-source-inspection
           path: ${{ runner.temp }}/PosledniySignal-source.zip
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 30
 
       - name: Validate project files
         run: python3 tools/validate_project.py
