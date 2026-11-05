@@ -21,16 +21,30 @@ concurrency:
 
 jobs:
   agent:
-    if: ${{ secrets.GEMINI_API_KEY != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
+      - name: Check API key
+        id: credentials
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        shell: bash
+        run: |
+          if [ -n "$GEMINI_API_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Add GEMINI_API_KEY in Settings → Secrets and variables → Actions to activate the autonomous agent."
+          fi
+
       - name: Checkout repository
+        if: steps.credentials.outputs.available == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Create isolated work branch
+        if: steps.credentials.outputs.available == 'true'
         id: branch
         shell: bash
         run: |
@@ -40,6 +54,7 @@ jobs:
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Run Gemini coding agent
+        if: steps.credentials.outputs.available == 'true'
         uses: google-github-actions/run-gemini-cli@v0.1.22
         env:
           GEMINI_CLI_TRUST_WORKSPACE: "true"
@@ -59,6 +74,7 @@ jobs:
           upload_artifacts: true
 
       - name: Publish changes as a pull request
+        if: steps.credentials.outputs.available == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ steps.branch.outputs.name }}
