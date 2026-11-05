@@ -1,1 +1,3 @@
 Android ARM64 debug APK — rebuild current main after GameDev Studio setup, with v1.2/v1.3 art, source validation, Godot 4.7.2 import and export; integrate v1.4 cinematic atlas only when all six verified source chunks are present.
+
+CI trigger: verify autonomous-agent setup and pull-request build pipeline.
