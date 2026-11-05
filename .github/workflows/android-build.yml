@@ -132,6 +132,9 @@ jobs:
       - name: Install v1.4 chapter-specific cinematic pixel art
         run: |
           set -euo pipefail
+          set -euo pipefail
+          test "$(find art/cinematics/encoded -maxdepth 1 -name 'cutscene_atlas.*.b64' | wc -l)" -eq 13
+          cat art/cinematics/encoded/cutscene_atlas.*.b64 | base64 --decode > art/cinematics/cutscene_atlas.webp
           test -s art/cinematics/cutscene_atlas.webp
           mkdir -p assets/cinematics
           cp art/cinematics/cutscene_atlas.webp assets/cinematics/
