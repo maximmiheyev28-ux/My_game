@@ -59,16 +59,16 @@ patch_once(
         shard.position = Vector2(float((i % 3) - 1) * 5.0, float(i / 3) * 3.0 - 4.0)
         burst.add_child(shard)
         var shard_tween := shard.create_tween()
-        var direction := -1.0 if i % 2 == 0 else 1.0
+        var shard_direction := -1.0 if i % 2 == 0 else 1.0
         shard_tween.set_parallel(true)
-        shard_tween.tween_property(shard, "position", shard.position + Vector2(direction * (12.0 + float(i % 4) * 4.0), -10.0 - float(i % 3) * 5.0), 0.24).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-        shard_tween.tween_property(shard, "rotation", direction * 1.8, 0.24)
+        shard_tween.tween_property(shard, "position", shard.position + Vector2(shard_direction * (12.0 + float(i % 4) * 4.0), -10.0 - float(i % 3) * 5.0), 0.24).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+        shard_tween.tween_property(shard, "rotation", shard_direction * 1.8, 0.24)
         shard_tween.tween_property(shard, "modulate:a", 0.0, 0.24)
     var death_tween := create_tween()
     death_tween.set_parallel(true)
     death_tween.tween_property(visual, "scale", Vector2(1.18, 0.72), 0.10)
     death_tween.tween_property(visual, "modulate", Color(0.35,0.88,1.0,0.0), 0.22)
-    death_tween.tween_property(visual, "rotation", 0.16 if direction == 1.0 else -0.16, 0.22)
+    death_tween.tween_property(visual, "rotation", 0.16 if self.direction == 1 else -0.16, 0.22)
     death_tween.chain().tween_callback(burst.queue_free)
     death_tween.tween_callback(queue_free)
 ''',
