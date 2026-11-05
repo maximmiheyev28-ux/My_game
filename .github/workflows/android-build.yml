@@ -126,6 +126,8 @@ jobs:
           set -euo pipefail
           python3 -m py_compile visual_upgrade_v3.py
           python3 visual_upgrade_v3.py
+          python3 -m py_compile refine_backgrounds.py
+          python3 refine_backgrounds.py
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
@@ -137,6 +139,7 @@ jobs:
           assert len(digests)>=8, f"Run animation has only {len(digests)} distinct frames"
           assert all(Image.open(p).size==(80,96) for p in frames), "Unexpected hero frame dimensions"
           assert all((Path("assets/backgrounds")/f"foreground_{i}.png").is_file() for i in range(6))
+          assert all(Image.open(Path("assets/backgrounds")/f"act_{i}.png").size==(4200,360) for i in range(6)), "Chapter panorama dimensions changed"
           player_source=Path("scripts/player/player.gd").read_text(encoding="utf-8")
           assert "visual.scale = Vector2(0.72, 0.72)" in player_source, "Hero scale regression: expected slightly smaller 0.72 scale"
           assert "visual.position.y = -36.0" in player_source, "Hero vertical anchor regression"
