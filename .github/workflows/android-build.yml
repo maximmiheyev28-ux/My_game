@@ -130,13 +130,21 @@ jobs:
           from pathlib import Path
           from PIL import Image
           import hashlib
+          import numpy as np
           root=Path("assets/characters")
           frames=[root/f"player_run_{i}.png" for i in range(10)]
           digests={hashlib.sha256(p.read_bytes()).hexdigest() for p in frames}
           assert len(digests)>=8, f"Run animation has only {len(digests)} distinct frames"
           assert all(Image.open(p).size==(80,96) for p in frames), "Unexpected hero frame dimensions"
           assert all((Path("assets/backgrounds")/f"foreground_{i}.png").is_file() for i in range(6))
-          print(f"ART QUALITY CHECK: {len(digests)} unique run frames; six foreground layers verified.")
+          player_source=Path("scripts/player/player.gd").read_text(encoding="utf-8")
+          assert "visual.scale = Vector2(0.72, 0.72)" in player_source, "Hero scale regression: expected slightly smaller 0.72 scale"
+          assert "visual.position.y = -36.0" in player_source, "Hero vertical anchor regression"
+          luminance=[]
+          for chapter in range(6):
+              image=np.asarray(Image.open(Path("assets/backgrounds")/f"act_{chapter}.png").convert("RGB"),dtype=np.float32)
+              luminance.append(float((0.2126*image[:,:,0]+0.7152*image[:,:,1]+0.0722*image[:,:,2]).mean()))
+          print(f"ART QUALITY CHECK: {len(digests)} unique run frames; six foreground layers; hero scale 0.72; background mean luminance {[round(x,1) for x in luminance]}.")
           PY
 
       - name: Install v1.4 chapter-specific cinematic pixel art
