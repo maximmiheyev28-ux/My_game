@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v1.3 art pass: hand-posed character animation and richly textured parallax art."""
+"""v1.3 art pass: hand-posed character animation and cleaner, readable parallax art."""
 from pathlib import Path
 import math, random
 from PIL import Image, ImageDraw, ImageFilter
@@ -119,7 +119,7 @@ def enrich_background(chapter):
      xx=bx-width/3+k*width/15; d.line((xx,y-15,xx+2,y+20),fill=(95,91,132,170),width=1)
     for k in range(5):
      xx=bx-width/4+k*width/8; d.rectangle((xx-3,y+1,xx+3,y+13),fill=tuple(bytes.fromhex(gold[1:]))+(190,))
-  for bx in range(sx+8,sx+700,38):
+  for bx in range(sx+8,sx+700,56):
    y=rng.randint(120,245); d.line((bx,y,bx,285),fill=(32,37,67,155),width=1)
    if rng.random()<.55:
     d.rectangle((bx+3,y+8,bx+9,y+19),fill=(8,12,29,235),outline=(90,93,132,170))
@@ -127,7 +127,7 @@ def enrich_background(chapter):
    if rng.random()<.28:
     d.line((bx+13,y+18,bx+13,285),fill=(9,12,24,230),width=3)
     d.line((bx+14,y+18,bx+14,285),fill=(71,82,111,150),width=1)
-  for k in range(8):
+  for k in range(5):
    x=sx+rng.randrange(20,680); y=rng.randrange(75,230)
    if k%3==0:
     d.rectangle((x,y,x+18,y+12),fill=(9,13,30,235),outline=tuple(bytes.fromhex(cyan[1:]))+(200,))
@@ -146,7 +146,7 @@ def enrich_background(chapter):
     for b in [[(tx+3,257),(tx-30,225),(tx-67,211)],[(tx-3,229),(tx+37,194),(tx+79,183)],[(tx+1,204),(tx-15,173),(tx-10,145)],[(tx+4,270),(tx+51,244),(tx+85,226)]]: d.line(b,fill=(25,16,39,255),width=3)
     for cx,cy,rx,ry in ((tx-56,208,34,19),(tx-18,177,36,22),(tx+26,192,35,21),(tx+67,182,30,17),(tx+66,227,25,16)):
      d.ellipse((cx-rx,cy-ry,cx+rx,cy+ry),fill=(100,30,93,220))
-     for _ in range(130):
+     for _ in range(70):
       x=cx+rng.randint(-rx,rx); y=cy+rng.randint(-ry,ry)
       if ((x-cx)/rx)**2+((y-cy)/ry)**2<1: d.rectangle((x,y,x+2,y+2),fill=rng.choice([(226,64,164,245),(250,103,188,245),(255,159,214,240),(255,206,229,230)]))
   for lx in (sx+115,sx+585):
@@ -154,14 +154,14 @@ def enrich_background(chapter):
    d.rectangle((lx-13,ly-20,lx+13,ly+20),fill=(8,10,25,250),outline=(99,74,123,240),width=2)
    d.rectangle((lx-8,ly-14,lx+8,ly+14),fill=tuple(bytes.fromhex(gold[1:]))+(235,))
    d.line((lx-5,ly-12,lx-5,ly+12),fill=(255,242,213,245),width=2)
- for _ in range(17000):
+ for _ in range(5200):
   x=rng.randrange(W); y=rng.randrange(H)
-  if y<285:d.rectangle((x,y,x+rng.choice([1,1,2]),y+rng.choice([1,2])),fill=rng.choice([(160,174,218,35),(8,10,25,90),(255,126,194,38),(74,198,233,34)]))
- for _ in range(2100):
-  x=rng.randrange(W); y=rng.randrange(290,H); d.line((x,y,min(W-1,x+rng.randrange(3,27)),y+rng.choice([-1,0,0,1])),fill=rng.choice([(255,91,177,105),(73,221,246,110),(255,194,125,95),(120,123,190,75)]),width=1)
+  if y<285:d.rectangle((x,y,x+rng.choice([1,1,2]),y+rng.choice([1,2])),fill=rng.choice([(160,174,218,20),(8,10,25,48),(255,126,194,22),(74,198,233,20)]))
+ for _ in range(650):
+  x=rng.randrange(W); y=rng.randrange(290,H); d.line((x,y,min(W-1,x+rng.randrange(3,27)),y+rng.choice([-1,0,0,1])),fill=rng.choice([(255,91,177,58),(73,221,246,62),(255,194,125,52),(120,123,190,42)]),width=1)
  im=Image.alpha_composite(im.convert('RGBA'),ov); arr=np.asarray(im.convert('RGB')); bright=((arr[:,:,0]>145)&(arr[:,:,2]>130))|((arr[:,:,1]>165)&(arr[:,:,2]>175))
- glow=np.zeros((H,W,4),dtype=np.uint8); glow[:,:,:3]=arr; glow[:,:,3]=bright.astype(np.uint8)*55
- im=Image.alpha_composite(im,Image.fromarray(glow,'RGBA').filter(ImageFilter.GaussianBlur(3.5)))
+ glow=np.zeros((H,W,4),dtype=np.uint8); glow[:,:,:3]=arr; glow[:,:,3]=bright.astype(np.uint8)*28
+ im=Image.alpha_composite(im,Image.fromarray(glow,'RGBA').filter(ImageFilter.GaussianBlur(2.2)))
  im.convert('RGB').save(path,optimize=True)
 for i in range(6):enrich_background(i)
 
@@ -193,11 +193,11 @@ def make_foreground(chapter):
 for i in range(6):make_foreground(i)
 
 player=ROOT/'scripts/player/player.gd'; s=player.read_text(encoding='utf-8')
-s=s.replace('visual.scale = Vector2(0.8, 0.8)','visual.scale = Vector2(1.08, 1.08)')
-s=s.replace('visual.position.y = -32.0','visual.position.y = -40.0')
-s=s.replace('visual.position.y = -32.0 + sin(animation_clock * 7.0) * 1.2','visual.position.y = -40.0 + sin(animation_clock * 7.0) * 1.2')
-s=s.replace('visual.position.y = -32.0 + absf(sin(animation_clock * 26.0)) * 2.0','visual.position.y = -40.0 + absf(sin(animation_clock * 26.0)) * 2.0')
-s=s.replace('visual.position.y = -32.0 + bob','visual.position.y = -40.0 + bob')
+s=s.replace('visual.scale = Vector2(0.8, 0.8)','visual.scale = Vector2(0.72, 0.72)')
+s=s.replace('visual.position.y = -32.0','visual.position.y = -36.0')
+s=s.replace('visual.position.y = -32.0 + sin(animation_clock * 7.0) * 1.2','visual.position.y = -36.0 + sin(animation_clock * 7.0) * 1.2')
+s=s.replace('visual.position.y = -32.0 + absf(sin(animation_clock * 26.0)) * 2.0','visual.position.y = -36.0 + absf(sin(animation_clock * 26.0)) * 2.0')
+s=s.replace('visual.position.y = -32.0 + bob','visual.position.y = -36.0 + bob')
 s=s.replace('var cadence := 0.065 if dash_timer > 0.0 else 0.078','var cadence := 0.052 if dash_timer > 0.0 else 0.064')
 s=s.replace('int(animation_clock * 14.0) % TEX_HURT.size()','int(animation_clock * 18.0) % TEX_HURT.size()')
 s=s.replace('int(animation_clock * 11.0) % TEX_STASIS.size()','int(animation_clock * 13.0) % TEX_STASIS.size()')
