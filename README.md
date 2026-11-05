@@ -17,3 +17,7 @@ GitHub Actions восстанавливает Godot-проект, применя
 [Открыть GitHub Actions](https://github.com/maximmiheyev28-ux/My_game/actions).
 
 APK — debug-сборка для установки и проверки. Успешная CI-сборка и проверка подписи не заменяют тестирование игрового процесса на физическом Android-устройстве.
+
+## Команда разработки
+
+В репозитории настроены GitHub Copilot custom agent-профили для pixel art, Godot-разработки и QA. Требования, инструкции и активация облачного агента описаны в [AGENT_SETUP.md](.github/AGENT_SETUP.md). Android CI запускается также на pull request в `main`.
