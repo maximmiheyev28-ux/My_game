@@ -77,7 +77,7 @@ world_addition = world_anchor + """
     # Independent foreground atlas creates a second parallax plane in cutscenes.
     var foreground_atlas := AtlasTexture.new()
     foreground_atlas.atlas = load("res://assets/backgrounds/foreground_%d.png" % _chapter)
-    foreground_source_x = min(4200 - 640, 240 + _chapter * 545)
+    var foreground_source_x := mini(4200 - 640, 240 + _chapter * 545)
     foreground_atlas.region = Rect2(foreground_source_x, 0, 640, 360)
     _foreground = TextureRect.new()
     _foreground.texture = foreground_atlas
