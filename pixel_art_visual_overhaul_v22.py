@@ -205,6 +205,7 @@ MAPS = {
 def draw_map(im, x, y, rows, tint=None, scale=1):
     d=ImageDraw.Draw(im)
     for ry,row in enumerate(rows):
+        row=row.replace(" ","")
         for rx,ch in enumerate(row):
             c=PALETTE.get(ch)
             if c is None: continue
@@ -248,12 +249,12 @@ def chapter_scene(ch):
     draw_skyline(im,ch,t)
     # Seven authored object placements per chapter; each uses a pixel map, not a primitive proxy.
     props = {
-      0:[("shop",34,37,2),("train",260,43,1),("vending",525,65,2),("shop",760,38,2),("train",1035,45,1),("vending",1250,65,2)],
-      1:[("furnace",28,29,2),("crane",282,17,2),("furnace",560,31,2),("crane",820,18,2),("furnace",1086,30,2)],
-      2:[("ship",30,51,2),("crane",270,18,2),("dock",525,57,2),("ship",770,50,2),("crane",1040,20,2)],
-      3:[("tower",28,9,3),("tower",300,14,2),("shop",570,43,2),("tower",820,12,3),("tower",1110,14,2)],
-      4:[("tree",48,56,2),("greenhouse",270,54,2),("tree",540,56,2),("dish",800,52,2),("greenhouse",1050,54,2)],
-      5:[("relay",42,23,2),("radio",295,32,2),("antenna",550,54,2),("relay",830,22,2),("radio",1095,31,2)]
+      0:[("shop",34,37,2),("train",260,43,1),("vending",525,65,2),("tower",790,14,2),("dish",1120,49,2)],
+      1:[("furnace",28,29,2),("crane",282,17,2),("dock",555,49,2),("antenna",850,42,2),("ship",1110,53,2)],
+      2:[("ship",30,51,2),("crane",270,18,2),("dock",525,57,2),("radar",810,42,2),("tower",1110,14,2)],
+      3:[("tower",28,9,3),("radar",300,39,2),("shop",570,43,2),("relay",850,20,2),("crane",1120,17,2)],
+      4:[("tree",48,56,2),("greenhouse",270,54,2),("dish",560,52,2),("vending",850,59,2),("tower",1110,13,2)],
+      5:[("relay",42,23,2),("radio",295,32,2),("antenna",550,54,2),("tower",830,15,2),("dish",1110,50,2)]
     }[ch]
     for name,x,y,scale in props:
         tint={"c":t["cyan"],"p":t["pink"],"w":t["warm"]}
@@ -360,9 +361,12 @@ def make_actor(rows, size, frame, kind, boss=False):
         # to expand the vertical anatomy while retaining square pixel clusters.
         rows=[row for row in rows for _ in range(2)]
     maxw=max(map(len,rows)); maxh=len(rows)
-    cell=max(1,min((size[0]-4)//maxw,(size[1]-4)//maxh))
+    # Six-frame pose cycle: small pixel-grid body bob and opposing leg swing.
+    bob=(0,-1,-1,0,1,0)[frame%6]
+    maxh += abs(bob)
+    cell=max(1,min((size[0]-4)//max(map(len,rows)),(size[1]-4)//len(rows)))
     im=Image.new("RGBA",size,(0,0,0,0)); d=ImageDraw.Draw(im)
-    ox=(size[0]-maxw*cell)//2; oy=(size[1]-maxh*cell)//2
+    ox=(size[0]-max(map(len,rows))*cell)//2; oy=(size[1]-len(rows)*cell)//2+bob
     for y,row in enumerate(rows):
         for x,ch in enumerate(row):
             col=ACTOR_PALETTE.get(ch)
@@ -371,7 +375,12 @@ def make_actor(rows, size, frame, kind, boss=False):
             if ch=="p" and frame%3==1: col=(248,105,169)
             if ch=="c" and frame%2: col=(130,242,250)
             if ch=="w" and frame in (2,3): col=(255,225,164)
-            xx=ox+x*cell; yy=oy+y*cell
+            # Walking frames shift the lower-leg pixel clusters in opposite directions.
+            if not boss and y >= maxh-4 and frame in (1,2,4,5):
+                x_shift = (1 if x < maxw//2 else -1) if frame in (1,2) else (-1 if x < maxw//2 else 1)
+            else:
+                x_shift = 0
+            xx=ox+(x+x_shift)*cell; yy=oy+y*cell
             d.rectangle((xx,yy,xx+cell-1,yy+cell-1),fill=(*col,255))
     if boss:
         # A tiny rune shifts along a six-frame pulse while the silhouette stays anchored.
