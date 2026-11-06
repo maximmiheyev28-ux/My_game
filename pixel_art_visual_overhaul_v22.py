@@ -429,7 +429,13 @@ BOSSES = {
   "...kddmmddmmddk........kddmmddmmddk...",
   "..kddmmk..kddmmk......kmmddk..kmmddk..",
   ".kddmmk....kddmmk....kmmddk....kmmddk.",
-  "kkmmkk......kkmmkk..kkmmkk......kkmmkk"
+  "kkmmkk......kkmmkk..kkmmkk......kkmmkk",
+  ".kkddmhhhhmddkk......kkddmhhhhmddkk.",
+  "..kkddmccccmddkk....kkddmccccmddkk..",
+  "...kkddmmddmmddkk..kkddmmddmmddkk...",
+  "....kkdddk..kdddk....kdddk..kdddk....",
+  "...kkmmkk....kkmmkk..kkmmkk....kkmmkk",
+  "..kkmkk........kkmkk..kkmkk........kkmkk"
  ],
  "surgeon": [
   ".............kkkkkk............","..........kkkddddddkkk.........",
