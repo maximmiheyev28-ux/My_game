@@ -687,17 +687,47 @@ def write_cinematics():
     atlas.save(out/"cutscene_atlas.webp",lossless=True,method=6)
 def validate():
     from PIL import ImageStat
+    bg_signatures=set()
     for ch in range(6):
-        p=BG/f"act_{ch}.png"
-        with Image.open(p) as im:
-            assert im.size==(4200,360) and im.mode=="RGB"
-            assert len(im.resize((140,12)).getcolors(140*12) or [])>80
-            assert min(ImageStat.Stat(im).stddev)>7
+        with Image.open(BG/f"act_{ch}.png") as im:
+            assert im.size==(4200,360) and im.mode=="RGB", f"chapter {ch}: invalid panorama canvas"
+            reduced=im.resize((140,12),Image.Resampling.NEAREST)
+            colors=reduced.getcolors(140*12) or []
+            assert len(colors)>80, f"chapter {ch}: insufficient palette complexity"
+            assert min(ImageStat.Stat(im).stddev)>7, f"chapter {ch}: flat color distribution"
+            bg_signatures.add(reduced.tobytes())
         with Image.open(BG/f"foreground_{ch}.png") as im:
-            assert im.size==(4200,360) and im.mode=="RGBA" and im.getchannel("A").getbbox()
-    assert len({(CH/f"{kind}_{i}.png").read_bytes() for kind in ACTORS for i in range(6)})>=24
-    assert len({(CH/f"boss_{kind}_{i}.png").read_bytes() for kind in BOSSES for i in range(6)})>=36
-    with Image.open(ROOT/"assets/cinematics/cutscene_atlas.webp") as im: assert im.size==(960,360)
+            assert im.size==(4200,360) and im.mode=="RGBA" and im.getchannel("A").getbbox(), f"chapter {ch}: invalid parallax plane"
+    assert len(bg_signatures)==6, "Chapter backgrounds must be genuinely distinct"
+    for kind in ACTORS:
+        paths=[CH/f"{kind}_{i}.png" for i in range(6)]
+        assert all(p.is_file() for p in paths), f"{kind}: missing animation frame"
+        assert len({p.read_bytes() for p in paths})==6, f"{kind}: duplicate animation frames"
+        for path in paths:
+            with Image.open(path) as im:
+                assert im.size==(60,64) and im.mode=="RGBA", f"{path}: wrong enemy frame format"
+                assert im.getchannel("A").getbbox() is not None, f"{path}: empty sprite"
+    for kind in BOSSES:
+        paths=[CH/f"boss_{kind}_{i}.png" for i in range(6)]
+        assert all(p.is_file() for p in paths), f"boss {kind}: missing frame"
+        assert len({p.read_bytes() for p in paths})==6, f"boss {kind}: duplicate animation frames"
+        for path in paths:
+            with Image.open(path) as im:
+                assert im.size==(96,112) and im.mode=="RGBA", f"{path}: wrong boss frame format"
+                assert im.getchannel("A").getbbox() is not None, f"{path}: empty sprite"
+    for name in ("pixel_rain","pixel_steam","pixel_window","pixel_reflection"):
+        with Image.open(FX/f"{name}.png") as im:
+            assert im.mode=="RGBA" and im.getchannel("A").getbbox(), f"missing/empty FX sprite {name}"
+    for i in range(6):
+        with Image.open(FX/f"pixel_petal_{i}.png") as im:
+            assert im.mode=="RGBA" and im.getchannel("A").getbbox(), f"empty petal frame {i}"
+    with Image.open(ROOT/"assets/cinematics/cutscene_atlas.webp") as atlas:
+        assert atlas.size==(960,360), "Cinematic atlas has the wrong 3x2 panel dimensions"
+        signatures=set()
+        for ch in range(6):
+            box=((ch%3)*320,(ch//3)*180,(ch%3+1)*320,(ch//3+1)*180)
+            signatures.add(atlas.crop(box).resize((80,45)).tobytes())
+        assert len(signatures)==6, "Cinematic panels must be visually distinct"
 def main():
     write_backgrounds(); save_animation(); save_weather(); write_cinematics(); validate()
     print("v2.2 QA: 6 chapter scenes, 6 parallax layers, 24 enemy frames, 36 boss frames, 30 weather sprites, cinematic atlas.")
