@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 from pathlib import Path
 from PIL import Image, ImageDraw
 
@@ -462,10 +463,11 @@ def strengthen_validator():
     quality += '''            pass\n'''
     quality += '''    if len(digests) != count:\n'''
     quality += '''        errors.append(f"Hero {mode} cycle has repeated frames: {len(digests)}/{count} unique")\n\n'''
-    if "hero-frame integrity" not in source:
-        if marker not in source:
-            raise SystemExit("v2.0: could not find validator insertion point")
-        source = source.replace(marker, quality + marker, 1)
+    # Collapse any prior generated copies, then install exactly one block.
+    source = re.sub(r"(?ms)^# Hero-frame integrity:.*?(?=^image_count = 0$)", "", source)
+    if source.count(marker) != 1:
+        raise SystemExit("v2.0: validator insertion point is missing or ambiguous")
+    source = source.replace(marker, quality + marker, 1)
     path.write_text(source, encoding="utf-8")
 
 
