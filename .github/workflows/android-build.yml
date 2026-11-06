@@ -185,6 +185,8 @@ jobs:
           # Apply v1.8 last so its cutscene hooks remain compatible with either backdrop path.
           python3 -m py_compile cinematic_pixel_fx.py
           python3 cinematic_pixel_fx.py
+          python3 -m py_compile environmental_weather_v19.py
+          python3 environmental_weather_v19.py
 
 
       - name: Package restored project for visual overhaul
