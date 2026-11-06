@@ -65,7 +65,7 @@ def draw_sky(im, t, rng, chapter):
         width=22+(i*19)%58
         shade=lerp(t["haze"],t["sky"],.42)
         rect(d,(x,y,x+width,y+1),shade)
-        rect(d,(x+7,y+2,x+width-8,y+2],shade)
+        rect(d,(x+7,y+2,x+width-8,y+2),shade)
     # Stars and distant aircraft lights are sparse and intentional.
     for i in range(65):
         x=(i*97+chapter*53)%1390+4
