@@ -501,7 +501,7 @@ def make_actor(rows, size, frame, kind, boss=False):
     maxh += abs(bob)
     cell=max(1,min((size[0]-4)//max(map(len,rows)),(size[1]-4)//len(rows)))
     im=Image.new("RGBA",size,(0,0,0,0)); d=ImageDraw.Draw(im)
-    ox=(size[0]-max(map(len,rows))*cell)//2; oy=(size[1]-len(rows)*cell)//2+bob
+    ox=(size[0]-max(map(len,rows))*cell)//2; oy=(size[1]-len(rows)*cell)//2+bob*cell
     for y,row in enumerate(rows):
         for x,ch in enumerate(row):
             col=ACTOR_PALETTE.get(ch)
@@ -511,8 +511,16 @@ def make_actor(rows, size, frame, kind, boss=False):
             if ch=="c" and frame%2: col=(130,242,250)
             if ch=="w" and frame in (2,3): col=(255,225,164)
             # Walking frames shift the lower-leg pixel clusters in opposite directions.
-            if not boss and y >= maxh-4 and frame in (1,2,4,5):
+            if not boss and y >= maxh-5 and frame in (1,2,4,5):
                 x_shift = (1 if x < maxw//2 else -1) if frame in (1,2) else (-1 if x < maxw//2 else 1)
+            elif not boss and y >= int(maxh*.27) and y <= int(maxh*.60) and frame in (1,2,4,5):
+                # Opposing shoulder/forearm motion produces a readable six-frame gait.
+                if x < maxw*.22:
+                    x_shift = -1 if frame in (1,2) else 1
+                elif x > maxw*.78:
+                    x_shift = 1 if frame in (1,2) else -1
+                else:
+                    x_shift = 0
             else:
                 x_shift = 0
             xx=ox+(x+x_shift)*cell; yy=oy+y*cell
