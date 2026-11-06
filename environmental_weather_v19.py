@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""v1.9: add a restrained, pixel-snapped animated rain/fog pass behind gameplay."""
+"""v1.9: add pixel-snapped animated rain and drifting fog behind gameplay."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 LEVEL = ROOT / "scripts" / "levels" / "level.gd"
-WEATHER = ROOT / "scripts" / "fx" / "weather_overlay.gd"
+FX_DIR = ROOT / "scripts" / "fx"
+WEATHER = FX_DIR / "weather_overlay.gd"
+SHADER = FX_DIR / "weather_overlay.gdshader"
 
-WEATHER.parent.mkdir(parents=True, exist_ok=True)
-weather_source = r'''extends Node2D
-
-const WEATHER_SHADER := """
-shader_type canvas_item;
+shader_source = """shader_type canvas_item;
 render_mode unshaded;
 
 uniform vec4 rain_tint : source_color = vec4(0.42, 0.78, 0.96, 1.0);
@@ -41,6 +39,10 @@ void fragment() {
 }
 """
 
+weather_source = '''extends Node2D
+
+const WEATHER_SHADER: Shader = preload("res://scripts/fx/weather_overlay.gdshader")
+
 func _ready() -> void:
     var layer := CanvasLayer.new()
     layer.name = "WEATHER_CANVAS"
@@ -54,15 +56,17 @@ func _ready() -> void:
     overlay.color = Color.WHITE
     overlay.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
-    var shader := Shader.new()
-    shader.code = WEATHER_SHADER
     var material := ShaderMaterial.new()
-    material.shader = shader
+    material.shader = WEATHER_SHADER
     overlay.material = material
     layer.add_child(overlay)
 '''
+
+FX_DIR.mkdir(parents=True, exist_ok=True)
 if not WEATHER.exists() or WEATHER.read_text(encoding="utf-8") != weather_source:
     WEATHER.write_text(weather_source, encoding="utf-8")
+if not SHADER.exists() or SHADER.read_text(encoding="utf-8") != shader_source:
+    SHADER.write_text(shader_source, encoding="utf-8")
 
 source = LEVEL.read_text(encoding="utf-8")
 marker = '    weather_overlay.name = "WEATHER_OVERLAY"'
@@ -84,6 +88,8 @@ if marker not in source:
 
 final_source = LEVEL.read_text(encoding="utf-8")
 assert marker in final_source, "Weather overlay was not installed in level.gd"
-assert "WEATHER_SHADER" in weather_source and "TIME * speed" in weather_source
+assert "preload(\"res://scripts/fx/weather_overlay.gdshader\")" in weather_source
+assert "TIME * speed" in shader_source
 assert "layer.layer = -1" in weather_source, "Weather must render behind gameplay sprites"
-print("v1.9: installed a pixel-snapped animated rain/fog shader behind gameplay.")
+assert '"""' not in weather_source, "GDScript must not contain a multiline shader string"
+print("v1.9: installed separate pixel-snapped rain/fog shader and GDScript overlay.")
