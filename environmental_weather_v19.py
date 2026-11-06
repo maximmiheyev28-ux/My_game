@@ -90,6 +90,7 @@ final_source = LEVEL.read_text(encoding="utf-8")
 assert marker in final_source, "Weather overlay was not installed in level.gd"
 assert "preload(\"res://scripts/fx/weather_overlay.gdshader\")" in weather_source
 assert "TIME * speed" in shader_source
+assert "shader_type canvas_item;" in shader_source and "COLOR = vec4" in shader_source
 assert "layer.layer = -1" in weather_source, "Weather must render behind gameplay sprites"
 assert '"""' not in weather_source, "GDScript must not contain a multiline shader string"
 print("v1.9: installed separate pixel-snapped rain/fog shader and GDScript overlay.")
