@@ -214,26 +214,79 @@ def draw_map(im, x, y, rows, tint=None, scale=1):
             x0=x+rx*scale; y0=y+ry*scale
             d.rectangle((x0,y0,x0+scale-1,y0+scale-1),fill=c)
 def draw_skyline(im, chapter, t):
+    """Layered raster architecture: clustered windows, recessed bays and roof hardware."""
     d=ImageDraw.Draw(im); rng=random.Random(7000+chapter*97)
-    # Distant skyline uses stepped roof profiles and broken window clusters.
-    x=-20
-    while x<W+30:
-        bw=rng.randint(28,58); bh=rng.randint(24,54); top=87-bh
-        base=mix(t["far"],t["haze"],rng.uniform(.05,.21))
-        roof=rng.choice((0,1,2,3))
-        if roof==0: points=[(x,87),(x,top+7),(x+7,top),(x+bw-6,top),(x+bw,top+8),(x+bw,87)]
-        elif roof==1: points=[(x,87),(x,top+5),(x+9,top+5),(x+9,top),(x+bw,top),(x+bw,87)]
-        elif roof==2: points=[(x,87),(x,top),(x+bw-9,top),(x+bw-3,top+9),(x+bw,top+9),(x+bw,87)]
-        else: points=[(x,87),(x,top+8),(x+5,top+8),(x+5,top),(x+bw-4,top),(x+bw,top+7),(x+bw,87)]
-        d.polygon(points,fill=base)
-        shade=mix(base,t["street"],.30)
-        d.line(points[:3],fill=mix(base,t["cyan"],.18),width=1)
-        for wy in range(top+9,84,8):
-            for wx in range(x+5,x+bw-4,7):
-                if rng.random()<.32:
-                    c=rng.choice((mix(base,t["warm"],.45),mix(base,t["cyan"],.52),shade))
-                    d.point((wx,wy),fill=c); d.point((wx+1,wy),fill=c)
-        x+=bw+rng.randint(4,12)
+    wall_base=mix(t["far"],t["mid"],.28)
+    wall_shadow=mix(wall_base,t["sky"],.34)
+    edge_light=mix(wall_base,t["cyan"],.20)
+    warm_light=mix(wall_base,t["warm"],.29)
+    cool_light=mix(wall_base,t["cyan"],.37)
+    x=-28
+    while x<W+36:
+        bw=rng.randint(25,53); bh=rng.randint(28,61); base=88+rng.randint(-2,2)
+        top=base-bh; style=rng.randrange(5)
+        # Pixel-stepped roofline with a different silhouette per building.
+        for yy in range(bh):
+            if style==0: inset=0 if yy>4 else (4 if yy<2 else 2)
+            elif style==1: inset=0 if yy>7 else max(0,8-yy)
+            elif style==2: inset=0 if yy>3 else (2 if yy==0 else 1)
+            elif style==3: inset=0 if yy>5 else (6 if yy<2 else 3)
+            else: inset=1 if yy<3 else (0 if yy%11<8 else 2)
+            left=x+inset; right=x+bw-inset-1
+            if right<=left: continue
+            for xx in range(left,right+1):
+                if xx==left: color=edge_light
+                elif xx==right: color=wall_shadow
+                elif yy<3: color=mix(wall_base,t["haze"],.18)
+                else: color=wall_base
+                # Recessed slab joints and occasional repaired concrete patches.
+                if yy>7 and yy%9==0 and xx>left+2 and xx<right-2:
+                    color=mix(color,t["sky"],.16)
+                d.point((xx,top+yy),fill=color)
+        # Irregular ledges, exposed conduits and window bays make each facade readable.
+        for floor_y in range(top+8,base-3,9):
+            if rng.random()<.72:
+                end=x+bw-rng.randint(3,9)
+                d.line((x+3,floor_y,end,floor_y),fill=mix(wall_base,t["haze"],.30),width=1)
+            for wx in range(x+5,x+bw-6,7):
+                if rng.random() < (0.66 if style in (1,3) else 0.48):
+                    wy=floor_y-rng.randint(2,4)
+                    # Dark inset, side bevel, glass pane, and a single reflection pixel.
+                    d.point((wx,wy),fill=wall_shadow)
+                    d.point((wx+1,wy),fill=wall_shadow)
+                    d.point((wx,wy+1),fill=wall_shadow)
+                    glass=rng.choice((cool_light,warm_light,mix(wall_shadow,t["cyan"],.24)))
+                    d.point((wx+1,wy+1),fill=glass)
+                    if rng.random()<.42: d.point((wx+2,wy+1),fill=mix(glass,t["sky"],.20))
+                    if rng.random()<.28: d.point((wx+1,wy+2),fill=mix(glass,t["haze"],.35))
+        # Roof silhouettes: antennae, lift rooms, vents and offset parapets.
+        if style in (0,3):
+            for k in range(rng.randint(1,3)):
+                rx=x+rng.randint(5,max(6,bw-6))
+                d.point((rx,top-1),fill=wall_shadow)
+                d.point((rx,top-2),fill=edge_light if k==0 else wall_shadow)
+                if k==0: d.line((rx,top-3,rx,top-6),fill=wall_shadow,width=1)
+        elif style==1 and bw>35:
+            d.line((x+5,top+2,x+bw-5,top+2),fill=mix(wall_base,t["cyan"],.20),width=1)
+            d.point((x+bw//2,top-1),fill=wall_shadow)
+        if style==2 and bh>40:
+            # Narrow external fire escape with interrupted landings.
+            ex=x+bw-5
+            d.line((ex,top+7,ex,base-5),fill=wall_shadow,width=1)
+            for fy in range(top+13,base-5,14):
+                d.line((ex-3,fy,ex+1,fy),fill=edge_light,width=1)
+        if style==4 and bw>37:
+            # Small rooftop machinery cluster, drawn as a dark body with lit service panel.
+            rx=x+bw//2
+            for dx,dy,col in ((0,-2,wall_shadow),(-1,-1,edge_light),(0,-1,wall_shadow),(1,-1,wall_shadow),(0,0,cool_light)):
+                d.point((rx+dx,top+dy),fill=col)
+        # A few wall-mounted AC units with grille pixels and a dangling service cable.
+        if bw>31 and rng.random()<.44:
+            ax=x+rng.randint(5,bw-9); ay=top+bh//2
+            d.point((ax,ay),fill=wall_shadow); d.point((ax+1,ay),fill=edge_light)
+            d.point((ax,ay+1),fill=wall_shadow); d.point((ax+1,ay+1),fill=cool_light)
+            d.line((ax+1,ay+2,ax+1,ay+4),fill=wall_shadow,width=1)
+        x+=bw+rng.randint(4,11)
 def chapter_scene(ch):
     t=THEMES[ch]; rng=random.Random(3200+ch*901)
     im=Image.new("RGB",(W,H),t["sky"]); d=ImageDraw.Draw(im)
