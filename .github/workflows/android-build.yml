@@ -187,6 +187,8 @@ jobs:
           python3 cinematic_pixel_fx.py
           python3 -m py_compile environmental_weather_v19.py
           python3 environmental_weather_v19.py
+          python3 -m py_compile hero_sprite_overhaul_v20.py
+          python3 hero_sprite_overhaul_v20.py
 
 
       - name: Package restored project for visual overhaul
