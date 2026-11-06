@@ -510,9 +510,14 @@ def make_actor(rows, size, frame, kind, boss=False):
             if ch=="p" and frame%3==1: col=(248,105,169)
             if ch=="c" and frame%2: col=(130,242,250)
             if ch=="w" and frame in (2,3): col=(255,225,164)
+            if boss and ch in ("h","m") and frame in (1,2,4,5):
+                col=mix(col, (126,231,241), .18 if ch=="h" else .10)
             # Walking frames shift the lower-leg pixel clusters in opposite directions.
             if not boss and y >= maxh-5 and frame in (1,2,4,5):
                 x_shift = (1 if x < maxw//2 else -1) if frame in (1,2) else (-1 if x < maxw//2 else 1)
+            elif boss and y >= int(maxh*.22) and y <= int(maxh*.62) and frame in (1,2,4,5) and (x < maxw*.18 or x > maxw*.82):
+                # Heavy boss idle: shoulder plates and hanging arms move in an opposing rhythm.
+                x_shift = (-1 if x < maxw*.5 else 1) if frame in (1,2) else (1 if x < maxw*.5 else -1)
             elif not boss and y >= int(maxh*.27) and y <= int(maxh*.60) and frame in (1,2,4,5):
                 # Opposing shoulder/forearm motion produces a readable six-frame gait.
                 if x < maxw*.22:
@@ -526,10 +531,12 @@ def make_actor(rows, size, frame, kind, boss=False):
             xx=ox+(x+x_shift)*cell; yy=oy+y*cell
             d.rectangle((xx,yy,xx+cell-1,yy+cell-1),fill=(*col,255))
     if boss:
-        # A tiny rune shifts along a six-frame pulse while the silhouette stays anchored.
+        # Chest rune and eye glow breathe over the idle loop; arm plates move above.
         x=size[0]//2+(frame%3-1)*2; y=size[1]//3
-        d.point((x,y),fill=(130,240,255,255))
-        d.point((x+1,y),fill=(130,240,255,255))
+        rune=(150,245,255,255) if frame in (2,3) else (76,195,227,255)
+        d.point((x,y),fill=rune)
+        d.point((x+1,y),fill=rune)
+        d.point((x,y+1),fill=(255,116,177,255) if frame in (3,4) else rune)
     else:
         # Individual blade / scarf glint advances one pixel at a time.
         x=size[0]-5-(frame%3); y=size[1]//2+frame%2
