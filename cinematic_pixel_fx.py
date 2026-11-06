@@ -77,7 +77,8 @@ world_addition = world_anchor + """
     # Independent foreground atlas creates a second parallax plane in cutscenes.
     var foreground_atlas := AtlasTexture.new()
     foreground_atlas.atlas = load("res://assets/backgrounds/foreground_%d.png" % _chapter)
-    foreground_atlas.region = Rect2(source_x, 0, 640, 360)
+    foreground_source_x := mini(4200 - 640, 240 + _chapter * 545)
+    foreground_atlas.region = Rect2(foreground_source_x, 0, 640, 360)
     _foreground = TextureRect.new()
     _foreground.texture = foreground_atlas
     _foreground.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -121,16 +122,23 @@ if "slash_frames.add_animation(\"katana\")" not in source:
         raise SystemExit(f"Cutscene slash insertion anchor mismatch: {source.count(slash_old)}")
     source = source.replace(slash_old, slash_new, 1)
 
-process_anchor = """    if is_instance_valid(_background):
+process_anchors = [
+    """    if is_instance_valid(_background):
         _background.position.x = sin(_anim_clock * 0.34) * 2.5
-"""
-process_new = process_anchor + """    if is_instance_valid(_foreground):
+""",
+    """    if is_instance_valid(_background):
+        _background.position = Vector2(sin(_anim_clock * 0.23) * 1.8, sin(_anim_clock * 0.37) * 0.8)"""
+]
+if "_foreground.position.x = sin(_anim_clock" not in source:
+    for process_anchor in process_anchors:
+        if source.count(process_anchor) == 1:
+            process_new = process_anchor + """    if is_instance_valid(_foreground):
         _foreground.position.x = sin(_anim_clock * 0.22 + 0.8) * 4.5
 """
-if "_foreground.position.x = sin(_anim_clock" not in source:
-    if source.count(process_anchor) != 1:
-        raise SystemExit(f"Cutscene parallax animation anchor mismatch: {source.count(process_anchor)}")
-    source = source.replace(process_anchor, process_new, 1)
+            source = source.replace(process_anchor, process_new, 1)
+            break
+    else:
+        raise SystemExit("Cutscene background drift anchor not found for either v1.3 or v1.4.")
 
 if "var _foreground: TextureRect" not in source:
     field_anchor = "var _background: TextureRect\n"
