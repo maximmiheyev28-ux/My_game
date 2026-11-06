@@ -130,6 +130,10 @@ jobs:
           python3 refine_backgrounds.py
           python3 -m py_compile refine_enemy_ai.py
           python3 refine_enemy_ai.py
+          python3 -m py_compile visual_combat_polish.py
+          python3 visual_combat_polish.py
+          python3 -m py_compile pixel_art_lighting_v16.py
+          python3 pixel_art_lighting_v16.py
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
