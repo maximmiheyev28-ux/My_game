@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import random
 from pathlib import Path
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "assets" / "backgrounds"
@@ -176,6 +176,294 @@ def street(im, t, chapter, rng):
     # Underpass darkness at the base adds strong foreground framing.
     rect(d,(0,117,1399,119),(3,5,13))
 
+
+def draw_panorama_landmarks(im, chapter, t):
+    """Seven individually composed, non-repeating set pieces across the 4200px world."""
+    d = ImageDraw.Draw(im)
+    def panel(x, y, w, h, edge, inner=(7, 12, 25)):
+        rect(d, (x, y, x+w, y+h), inner, edge)
+        rect(d, (x+2, y+2, x+w-2, y+4), lerp(inner, edge, .35))
+    def window_grid(x, y, cols, rows, color, seed):
+        rr = random.Random(seed)
+        for row in range(rows):
+            for col in range(cols):
+                wx=x+col*5; wy=y+row*6
+                if rr.random() < .62:
+                    rect(d,(wx,wy,wx+2,wy+3),color if rr.random()<.42 else lerp(color,(8,13,26),.48))
+    def cable(x1,y1,x2,y2,color):
+        line(d,[(x1,y1),((x1+x2)//2,y1+3),(x2,y2)],(4,7,16),2)
+        line(d,[(x1,y1-1),((x1+x2)//2,y1+2),(x2,y2-1)],color,1)
+    # Each module occupies its own camera-sized chapter of the panorama.
+    for seg, x in enumerate((0, 205, 410, 615, 820, 1025, 1230)):
+        accent = t["pink"] if (seg+chapter)%2==0 else t["cyan"]
+        warm = t["warm"]
+        base = 93
+        if chapter == 0:
+            if seg == 0:  # cramped noodle-house frontage
+                polygon(d,[(x+5,74),(x+18,56),(x+62,56),(x+77,74)],(17,19,39),accent)
+                panel(x+16,73,49,18,accent); window_grid(x+21,78,8,2,warm,seg+1)
+                signboard(im,x+25,48,38,10,t["pink"],t["cyan"],101)
+                for xx in (x+9,x+70): rect(d,(xx,65,xx+3,94),(5,8,18),t["cyan"])
+            elif seg == 1:  # vending-machine alcove
+                rect(d,(x+18,61,x+73,94),(11,16,31),(57,76,103))
+                for k in range(3):
+                    panel(x+22+k*16,67,12,24,t["cyan"] if k==1 else t["pink"])
+                    for yy in range(71,88,5): rect(d,(x+25+k*16,yy,x+30+k*16,yy+2),warm)
+                cable(x+7,43,x+88,49,t["pink"])
+            elif seg == 2:  # elevated train station and carriage
+                rect(d,(x,63,x+180,67),(5,9,21),t["cyan"])
+                rect(d,(x+25,49,x+112,63),(8,14,28),(73,91,118))
+                for k in range(5): rect(d,(x+31+k*15,53,x+41+k*15,60),t["cyan"])
+                rect(d,(x+20,66,x+122,68),t["pink"])
+                for xx in (x+12,x+132): line(d,[(xx,34),(xx,94)],(5,8,19),2)
+            elif seg == 3:  # stacked holographic billboards
+                for k,(yy,ww) in enumerate(((37,55),(55,43),(72,66))):
+                    signboard(im,x+28+(k%2)*22,yy,ww,11,accent if k%2==0 else warm,t["cyan"],110+seg*4+k)
+                line(d,[(x+18,32),(x+18,93)],(5,8,18),3)
+                for yy in (42,60,78): rect(d,(x+14,yy,x+22,yy+2),t["pink"])
+            elif seg == 4:  # narrow arcade with awning and shutter
+                polygon(d,[(x+8,65),(x+20,51),(x+83,51),(x+95,65)],(14,17,34),t["pink"])
+                for k in range(7):
+                    polygon(d,[(x+20+k*9,54),(x+28+k*9,54),(x+32+k*9,65),(x+24+k*9,65)],t["pink"] if k%2==0 else t["cyan"])
+                rect(d,(x+20,68,x+83,94),(8,12,25),(62,61,91))
+                for yy in range(75,91,4): line(d,[(x+26,yy),(x+77,yy)],(36,49,72))
+            elif seg == 5:  # overhead footbridge
+                rect(d,(x+2,53,x+190,57),(7,11,24),t["cyan"])
+                line(d,[(x+2,49),(x+190,49)],t["pink"],1)
+                for xx in range(x+10,x+190,12): line(d,[(xx,50),(xx,57)],(53,79,103))
+                for xx in (x+25,x+164): line(d,[(xx,57),(xx,94)],(5,8,18),3)
+            else:  # glowing street shrine
+                polygon(d,[(x+28,73),(x+42,55),(x+82,55),(x+96,73)],(13,17,34),warm)
+                polygon(d,[(x+20,56),(x+62,43),(x+104,56),(x+98,60),(x+62,49),(x+26,60)],(8,12,26),t["pink"])
+                panel(x+47,74,30,19,t["cyan"]); rect(d,(x+57,80,x+67,90),warm)
+        elif chapter == 1:
+            if seg == 0:  # blast furnace
+                polygon(d,[(x+14,94),(x+20,49),(x+34,39),(x+69,39),(x+83,49),(x+89,94)],(19,17,29),(100,61,53))
+                rect(d,(x+31,48,x+71,87),(9,12,22),(123,68,48))
+                for yy in (57,69,81): rect(d,(x+37,yy,x+65,yy+3),warm)
+                for xx in (x+26,x+77): line(d,[(xx,34),(xx,94)],(8,11,19),3)
+            elif seg == 1:  # pressure pipes and valves
+                for yy in (47,61,77):
+                    line(d,[(x+4,yy),(x+185,yy)],(7,11,20),5)
+                    line(d,[(x+4,yy-1),(x+185,yy-1)],accent,1)
+                for xx in (x+27,x+75,x+124,x+164):
+                    rect(d,(xx,yy-7,xx+8,yy+7),(14,17,27),warm)
+                    line(d,[(xx+4,yy-12),(xx+4,yy+12)],(8,11,18),2)
+            elif seg == 2:  # refinery distillation towers
+                for xx,top,w in ((x+18,35,27),(x+58,24,34),(x+111,43,29),(x+153,31,24)):
+                    rect(d,(xx,top,xx+w,94),(15,17,28),(84,66,67))
+                    rect(d,(xx-3,top+8,xx+w+3,top+12),(24,22,31),accent)
+                    for yy in range(top+20,88,13): rect(d,(xx+5,yy,xx+w-5,yy+2),warm)
+                    line(d,[(xx+w//2,top-8),(xx+w//2,top)],(7,10,17),2)
+            elif seg == 3:  # conveyor and robotic gantry
+                rect(d,(x+2,81,x+185,87),(5,8,17),(72,65,65))
+                for xx in range(x+8,x+180,12): d.ellipse((xx,83,xx+5,88),fill=(34,42,51))
+                for xx in (x+38,x+111,x+166):
+                    line(d,[(xx,28),(xx,75)],(8,11,18),4)
+                    line(d,[(xx,29),(xx+25,29)],accent,2)
+                    line(d,[(xx+25,29),(xx+25,49)],(8,11,18),2)
+            elif seg == 4:  # cooling towers
+                for xx in (x+20,x+88,x+147):
+                    polygon(d,[(xx,94),(xx+7,48),(xx+14,39),(xx+40,39),(xx+47,48),(xx+54,94)],(17,20,30),(76,75,80))
+                    rect(d,(xx+12,58,xx+42,60),accent)
+            elif seg == 5:  # freight loading crane
+                line(d,[(x+25,25),(x+25,94)],(7,10,18),4)
+                line(d,[(x+25,27),(x+173,27)],(7,10,18),4)
+                line(d,[(x+25,29),(x+173,29)],warm,1)
+                for xx in (x+51,x+103,x+153): line(d,[(xx,29),(xx,57)],accent,1)
+                for xx in (x+39,x+91,x+141):
+                    rect(d,(xx,58,xx+44,89),(17,23,32),accent)
+                    for k in range(4): line(d,[(xx+7+k*9,62),(xx+7+k*9,85)],(55,67,76))
+            else:  # smokestack bank
+                for xx,hh in ((x+22,56),(x+62,72),(x+111,49),(x+151,66)):
+                    rect(d,(xx,94-hh,xx+18,94),(14,16,26),(75,57,59))
+                    rect(d,(xx-2,92-hh,xx+20,95-hh),warm)
+                    for yy in range(94-hh+9,91,12): rect(d,(xx+4,yy,xx+14,yy+2),accent)
+        elif chapter == 2:
+            if seg == 0:  # container ship bow
+                polygon(d,[(x+4,70),(x+161,70),(x+188,86),(x+169,94),(x+22,94)],(8,24,37),t["cyan"])
+                for k in range(5):
+                    rect(d,(x+17+k*28,52,x+43+k*28,69),(13,43,57),t["cyan"])
+                    line(d,[(x+21+k*28,55),(x+21+k*28,66)],(46,101,115))
+                for xx in (x+40,x+91,x+142): rect(d,(xx,79,xx+4,82),warm)
+            elif seg == 1:  # gantry crane
+                line(d,[(x+28,18),(x+28,94)],(7,18,29),4)
+                line(d,[(x+28,20),(x+175,20)],(7,18,29),4)
+                line(d,[(x+28,22),(x+175,22)],t["cyan"],1)
+                line(d,[(x+155,22),(x+155,56)],(7,18,29),3)
+                rect(d,(x+130,57,x+180,86),(12,40,55),t["cyan"])
+                for xx in range(x+136,x+178,8): line(d,[(xx,61),(xx,82)],(46,98,111))
+            elif seg == 2:  # lighthouse and beacon
+                polygon(d,[(x+57,94),(x+68,35),(x+103,35),(x+114,94)],(15,35,47),t["cyan"])
+                rect(d,(x+64,27,x+108,39),(8,18,30),warm)
+                rect(d,(x+71,18,x+101,27),(9,20,31),t["cyan"])
+                line(d,[(x+86,18),(x+86,7)],warm,2)
+                for xx in (x+9,x+157): line(d,[(xx,83),(xx+9,83)],t["cyan"],1)
+            elif seg == 3:  # warehouse loading bays
+                polygon(d,[(x+3,58),(x+22,43),(x+176,43),(x+193,58),(x+193,94),(x+3,94)],(12,29,42),(54,91,105))
+                for k in range(4):
+                    panel(x+16+k*43,65,31,28,t["cyan"])
+                    rect(d,(x+21+k*43,70,x+42+k*43,90),(7,20,31))
+                    for yy in (74,82): line(d,[(x+22+k*43,yy),(x+41+k*43,yy)],(41,79,92))
+            elif seg == 4:  # moored tugboat
+                polygon(d,[(x+11,77),(x+178,77),(x+157,94),(x+35,94)],(8,23,34),t["cyan"])
+                rect(d,(x+62,51,x+115,77),(14,32,44),t["cyan"])
+                rect(d,(x+74,42,x+106,51),(12,26,38),warm)
+                for xx in (x+80,x+96): rect(d,(xx,45,xx+7,49),t["cyan"])
+                line(d,[(x+33,73),(x+15,55)],warm,1)
+            elif seg == 5:  # stacked cargo containers
+                for row in range(3):
+                    for col in range(4):
+                        xx=x+9+col*44+(row%2)*8; yy=49+row*15
+                        rect(d,(xx,yy,xx+39,yy+13),(12+row*2,35+col*2,48+row*2),t["cyan"] if (row+col)%2 else (70,110,118))
+                        for k in range(4): line(d,[(xx+5+k*9,yy+2),(xx+5+k*9,yy+11)],(38,77,91))
+            else:  # harbor signal mast
+                line(d,[(x+91,18),(x+91,94)],(7,19,31),3)
+                for yy,ww in ((29,48),(48,34),(67,20)):
+                    line(d,[(x+91-ww//2,yy),(x+91+ww//2,yy)],t["cyan"],1)
+                    rect(d,(x+87,yy-3,x+95,yy+3),warm)
+                cable(x+6,38,x+74,50,t["cyan"])
+        elif chapter == 3:
+            if seg == 0:  # corporate supertower
+                polygon(d,[(x+48,94),(x+58,22),(x+79,9),(x+120,9),(x+142,22),(x+152,94)],(15,17,42),(99,76,147))
+                for yy in range(30,88,8): rect(d,(x+77,yy,x+123,yy+3),t["cyan"] if yy%3 else t["pink"])
+                line(d,[(x+100,8),(x+100,0)],t["pink"],2)
+            elif seg == 1:  # skybridge between towers
+                for xx,top in ((x+14,28),(x+148,38)):
+                    rect(d,(xx,top,xx+34,94),(14,17,40),(72,76,131))
+                    window_grid(xx+6,top+9,5,8,t["cyan"],xx)
+                rect(d,(x+42,49,x+148,58),(18,20,49),t["pink"])
+                for xx in range(x+48,x+145,12): rect(d,(xx,52,xx+6,55),t["cyan"])
+            elif seg == 2:  # rooftop heliport
+                rect(d,(x+18,47,x+180,52),(12,14,36),(91,78,145))
+                line(d,[(x+98,46),(x+98,14)],(7,9,23),2)
+                d.ellipse((x+63,25,x+132,42),outline=t["cyan"],width=1)
+                line(d,[(x+57,33),(x+139,33)],t["pink"],1)
+                line(d,[(x+98,33),(x+98,21)],warm,1)
+            elif seg == 3:  # security checkpoint
+                for xx in (x+17,x+148):
+                    rect(d,(xx,48,xx+29,94),(12,14,34),(88,77,137))
+                    rect(d,(xx+6,55,xx+23,69),t["pink"])
+                    rect(d,(xx+9,58,xx+20,66),(8,12,28))
+                rect(d,(x+46,79,x+145,84),(8,10,25),t["cyan"])
+                for xx in range(x+55,x+140,16): line(d,[(xx,80),(xx,93)],(53,67,102))
+            elif seg == 4:  # holographic corporate crest
+                signboard(im,x+46,32,90,32,t["pink"],t["cyan"],303)
+                for k in range(4):
+                    line(d,[(x+25+k*42,72),(x+25+k*42,94)],(7,9,23),3)
+                line(d,[(x+24,73),(x+180,73)],t["cyan"],1)
+            elif seg == 5:  # office atrium with lit ribs
+                polygon(d,[(x+20,94),(x+43,31),(x+151,31),(x+176,94)],(12,14,35),(83,75,130))
+                for xx in range(x+50,x+160,13):
+                    line(d,[(xx,36),(x+31+(xx-x)//1,92)],(38,45,78),1)
+                rect(d,(x+80,54,x+117,92),(8,11,28),t["cyan"])
+            else:  # orbital antenna
+                line(d,[(x+98,21),(x+98,94)],(7,9,24),3)
+                d.arc((x+48,17,x+148,91),190,350,fill=t["cyan"],width=2)
+                line(d,[(x+50,43),(x+146,43)],t["pink"],1)
+                rect(d,(x+92,13,x+104,23),warm)
+        elif chapter == 4:
+            if seg == 0:  # water tanks and vents
+                for xx,yy,ww in ((x+18,44,39),(x+77,32,49),(x+145,51,31)):
+                    rect(d,(xx,yy,xx+ww,yy+31),(12,27,43),(76,96,112))
+                    rect(d,(xx+4,yy+4,xx+ww-4,yy+8),(32,61,76))
+                    line(d,[(xx+ww//2,yy-8),(xx+ww//2,yy)],(5,12,23),2)
+            elif seg == 1:  # greenhouse rooftop
+                polygon(d,[(x+12,91),(x+28,49),(x+164,49),(x+184,91)],(9,27,37),t["cyan"])
+                for xx in range(x+36,x+164,18):
+                    line(d,[(xx,51),(xx-7,90)],(47,91,91),1)
+                for xx,yy in ((x+53,69),(x+88,60),(x+124,73),(x+145,63)):
+                    line(d,[(xx,87),(xx,yy)],(8,19,26),2)
+                    for dx in (-4,3): rect(d,(xx+dx,yy+5,xx+dx+5,yy+9),t["cyan"])
+            elif seg == 2:  # satellite dish and aerials
+                d.arc((x+38,36,x+116,91),185,345,fill=(9,16,29),width=4)
+                d.arc((x+41,39,x+113,88),185,345,fill=t["cyan"],width=1)
+                line(d,[(x+78,67),(x+78,94)],(7,12,22),3)
+                line(d,[(x+78,67),(x+110,42)],t["pink"],1)
+                for xx in (x+135,x+157,x+177):
+                    line(d,[(xx,44),(xx,94)],(7,12,22),2)
+                    line(d,[(xx-7,56),(xx+7,56)],t["cyan"],1)
+            elif seg == 3:  # collapsed apartment facade
+                polygon(d,[(x+8,94),(x+15,38),(x+53,28),(x+83,43),(x+104,34),(x+128,55),(x+177,49),(x+190,94)],(13,24,39),(64,82,97))
+                for xx,yy in ((x+28,53),(x+66,65),(x+116,57),(x+151,71)):
+                    rect(d,(xx,yy,xx+14,yy+9),(5,11,21),t["pink"])
+                    line(d,[(xx+7,yy),(xx+7,yy+9)],(38,50,67),1)
+            elif seg == 4:  # fire escape and ladder
+                for yy in (48,65,82):
+                    line(d,[(x+17,yy),(x+112,yy)],(7,13,24),2)
+                    line(d,[(x+17,yy-2),(x+112,yy-2)],(70,91,104),1)
+                for xx in (x+22,x+106): line(d,[(xx,43),(xx,94)],(7,13,24),2)
+                for yy in range(49,94,7): line(d,[(x+129,yy),(x+148,yy)],t["cyan"],1)
+                line(d,[(x+129,43),(x+129,94)],(7,13,24),2)
+            elif seg == 5:  # rooftop garden and old tree
+                for xx in range(x+18,x+178,22):
+                    rect(d,(xx,82,xx+16,94),(9,26,29),(42,83,66))
+                    for k in range(3): rect(d,(xx+3+k*4,76-(k%2)*4,xx+5+k*4,82),t["cyan"])
+                line(d,[(x+102,82),(x+102,40)],(8,16,22),3)
+                for dx,yy in ((-17,43),(13,37),(-7,29),(20,51)):
+                    line(d,[(x+102,yy+10),(x+102+dx,yy)],(8,16,22),2)
+                    rect(d,(x+102+dx-3,yy-2,x+102+dx+3,yy+3),t["cyan"])
+            else:  # rooftop water tower
+                rect(d,(x+47,37,x+137,77),(13,27,41),(74,92,106))
+                d.arc((x+47,29,x+137,49),180,360,fill=(91,109,119),width=2)
+                for xx in (x+56,x+127): line(d,[(xx,77),(xx,94)],(7,13,22),3)
+                line(d,[(x+92,27),(x+92,12)],t["pink"],1)
+        else:
+            if seg == 0:  # broken transit arch
+                for xx in (x+18,x+145):
+                    polygon(d,[(xx,94),(xx+7,38),(xx+17,27),(xx+28,38),(xx+35,94)],(10,15,34),(66,79,108))
+                line(d,[(x+31,29),(x+153,29)],t["cyan"],2)
+                for xx in range(x+42,x+148,17): line(d,[(xx,31),(xx,51)],(7,10,23),2)
+            elif seg == 1:  # signal relay tower
+                line(d,[(x+96,13),(x+96,94)],(6,10,25),4)
+                for yy,ww in ((28,66),(48,48),(68,30)):
+                    line(d,[(x+96-ww//2,yy),(x+96+ww//2,yy)],t["cyan"],2)
+                    rect(d,(x+91,yy-4,x+101,yy+4),t["pink"])
+                cable(x+8,42,x+88,53,t["cyan"])
+            elif seg == 2:  # server monolith
+                polygon(d,[(x+35,94),(x+45,18),(x+144,18),(x+156,94)],(10,13,34),(89,70,133))
+                for yy in range(27,87,8):
+                    rect(d,(x+61,yy,x+139,yy+3),t["cyan"] if yy%3 else t["pink"])
+                    rect(d,(x+51,yy,x+56,yy+3),warm)
+                line(d,[(x+94,10),(x+94,18)],t["pink"],2)
+            elif seg == 3:  # reactor cooling pipes
+                for xx,top in ((x+21,37),(x+69,22),(x+128,43),(x+166,31)):
+                    rect(d,(xx,top,xx+21,94),(11,16,32),(72,79,112))
+                    for yy in range(top+8,90,12):
+                        rect(d,(xx+4,yy,xx+17,yy+3),t["cyan"] if yy%2 else t["pink"])
+                line(d,[(x+3,62),(x+194,62)],warm,1)
+            elif seg == 4:  # shattered signal dish
+                d.arc((x+38,20,x+161,112),190,350,fill=t["cyan"],width=2)
+                d.arc((x+49,31,x+150,103),190,350,fill=t["pink"],width=1)
+                line(d,[(x+99,66),(x+99,94)],(7,10,24),3)
+                for xx,yy in ((x+50,45),(x+68,32),(x+131,37),(x+150,55)):
+                    line(d,[(x+99,66),(xx,yy)],(7,11,25),2)
+                    rect(d,(xx-2,yy-2,xx+2,yy+2),warm)
+            elif seg == 5:  # abandoned platform with signal lamps
+                rect(d,(x+3,79,x+191,84),(7,10,24),t["cyan"])
+                for xx in (x+22,x+67,x+113,x+159):
+                    line(d,[(xx,34),(xx,79)],(6,10,23),3)
+                    rect(d,(xx-6,36,xx+6,47),(9,13,28),t["pink"])
+                    rect(d,(xx-2,39,xx+2,44),warm)
+                line(d,[(x+8,54),(x+185,54)],(7,11,24),2)
+            else:  # final antenna crown
+                line(d,[(x+97,10),(x+97,94)],(6,9,22),3)
+                for yy,ww in ((23,88),(42,65),(61,43)):
+                    line(d,[(x+97-ww//2,yy),(x+97+ww//2,yy)],t["pink"] if yy==23 else t["cyan"],1)
+                for xx in (x+53,x+141): rect(d,(xx,20,xx+5,25),warm)
+        # Small authored foreground props make each segment readable at gameplay zoom.
+        for k in range(3):
+            px=x+12+k*61
+            rect(d,(px,88,px+9,94),(5,8,17))
+            rect(d,(px+2,84,px+7,88),accent if k==1 else lerp(accent,t["warm"],.3))
+    # Fine pixel grain is clustered by architectural edge, never random full-frame noise.
+    for seg, x in enumerate((0,205,410,615,820,1025,1230)):
+        for k in range(13):
+            px=x+((k*37+seg*19)%190)
+            py=27+((k*17+chapter*7)%60)
+            c=lerp(t["far"],t["cyan"],.24 if k%3 else .42)
+            rect(d,(px,py,px+1,py+1),c)
+
 def chapter_scene(chapter):
     t=THEMES[chapter]
     rng=random.Random(32000+chapter*911)
@@ -278,14 +566,8 @@ def chapter_scene(chapter):
             line(d,[(x,36),(x+3,92)],(9,12,28),3)
             line(d,[(x-8,43),(x+12,43)],(9,12,28),2)
         signboard(im,162,60,42,13,t["pink"],t["cyan"],16)
-    # The landmark motif is intentionally repeated across the long panorama,
-    # instead of being stranded in the first 240 logical pixels.
-    landmark_pixels = ImageChops.difference(im.convert("RGB"), landmark_base.convert("RGB"))
-    landmark_mask = landmark_pixels.convert("L").point(lambda p: 255 if p else 0)
-    landmark_layer = im.copy()
-    landmark_layer.putalpha(landmark_mask)
-    for offset in (280, 560, 840, 1120):
-        im.alpha_composite(landmark_layer, dest=(offset, 0))
+    # Replace cloned motifs with individually authored landmarks across the panorama.
+    draw_panorama_landmarks(im, chapter, t)
     d = ImageDraw.Draw(im)
     # A handful of deliberately placed service details: AC units, ducts, fire escapes.
     for idx,x in enumerate((18,76,137,204)):
