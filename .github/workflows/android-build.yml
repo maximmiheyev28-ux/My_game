@@ -136,8 +136,6 @@ jobs:
           python3 visual_combat_polish.py
           python3 -m py_compile pixel_art_lighting_v16.py
           python3 pixel_art_lighting_v16.py
-          python3 -m py_compile cinematic_pixel_fx.py
-          python3 cinematic_pixel_fx.py
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
@@ -184,6 +182,9 @@ jobs:
           else
             echo "::warning::v1.4 cinematic atlas not integrated: expected six encoded source chunks; found ${#atlas_parts[@]}. Existing chapter backgrounds remain active."
           fi
+          # Apply v1.8 last so its cutscene hooks remain compatible with either backdrop path.
+          python3 -m py_compile cinematic_pixel_fx.py
+          python3 cinematic_pixel_fx.py
 
 
       - name: Package restored project for visual overhaul
