@@ -456,6 +456,95 @@ def draw_panorama_landmarks(im, chapter, t):
             px=x+12+k*61
             rect(d,(px,88,px+9,94),(5,8,17))
             rect(d,(px+2,84,px+7,88),accent if k==1 else lerp(accent,t["warm"],.3))
+
+    # Hand-authored pixel clusters: these are sprite-like silhouettes with
+    # highlight, midtone, shadow and material pixels, not polygon/rectangle props.
+    # Every row is a deliberate pixel map; '.' is transparent.
+    pixel_sprites = {
+        0: [
+            ".......KKKK.......","......KCCCCK......",".....KCCWWCCK.....",
+            "....KCCWWWWCCK....","....KCCW..WWCCK...","...KCCW....WCCK...",
+            "...KCCW....WCCK...","...KCCWWWWWWCCK...","...KCC..RR..CCK...",
+            "...KCC..RR..CCK...","...KCC..RR..CCK...","...KCC..RR..CCK...",
+            "...KCC..RR..CCK...","...KCC..RR..CCK...","...KCC..RR..CCK...",
+            "...KCC..RR..CCK...","...KCC..RR..CCK...","...KCCKKKKKKCCK...",
+            "...KKK......KKK...","..KK..........KK.."
+        ],
+        1: [
+            "......KKKKKK......",".....KCCCCCCK.....","....KCCWWWWCCK....",
+            "...KCCW....WCCK...","...KCCW....WCCK...","...KCCWWWWWWCCK...",
+            "...KCC..RR..CCK...","...KCC..RR..CCK...","...KCC..RR..CCK...",
+            "..KCC...RR...CCK..","..KCC...RR...CCK..","..KCC...RR...CCK..",
+            ".KCC....RR....CCK.","KCC.....RR.....CCK","KCC.....RR.....CCK",
+            "KCC....RRRR....CCK","KCC...RR..RR...CCK","KCC..RR....RR..CCK",
+            ".KKKKK......KKKKK.","...KK..........KK."
+        ],
+        2: [
+            "........KK........",".......KCCK.......","......KCCCCK......",
+            ".....KCCWWCCK.....","....KCCW..WCCK....","...KCCW....WCCK...",
+            "..KCCW......WCCK..","..KCCWWWWWWWWCCK..","...KCC......CCK...",
+            "....KCC....CCK....",".....KCC..CCK.....","......KCCCCK......",
+            ".......KCCK.......","......KCCCCK......",".....KCCWWCCK.....",
+            "....KCCW..WCCK....","...KCCW....WCCK...","..KCCW......WCCK..",
+            ".KKKK........KKKK.","KK..............KK"
+        ],
+        3: [
+            "....KKKKKKKK......","...KCCCCCCCCK.....","..KCCWWWWWWCCK....",
+            ".KCCW......WCCK...","KCCW........WCCK..","KCCW..RRRR..WCCK..",
+            "KCCW..R..R..WCCK..","KCCW..R..R..WCCK..","KCCW..RRRR..WCCK..",
+            "KCCW........WCCK..","KCCW..WWWW..WCCK..","KCCW..W..W..WCCK..",
+            "KCCW..WWWW..WCCK..","KCCW........WCCK..","KCCWWWWWWWWWWCCK..",
+            ".KCCCCCCCCCCCCK...","..KK..........KK..","..KK..........KK..",
+            ".KK............KK.","KK..............KK"
+        ],
+        4: [
+            ".......GG........","......GGGG.......",".....GGLLGG......",
+            "....GLLLLLLG.....","...GLLG..GLLG....","..GLLG....GLLG...",
+            ".GLLG......GLLG..","GLLG...BB...GLLG..","GLLG..BBBB..GLLG..",
+            "GLLG.BBBBBB.GLLG..","GLLGBBBBBBBB GLLG.".replace(" ",""),
+            ".GLLGBBBBBBGLLG...","..GLLGBBBBGLLG....","...GLLGBBGLLG.....",
+            "....GLLG.GLLG.....",".....GG...GG......","....KK.....KK.....",
+            "...KK.......KK....","..KK.........KK...",".................."
+        ],
+        5: [
+            "........KK........",".......KCCK.......","......KCCCCK......",
+            ".....KCCWWCCK.....","....KCCW..WCCK....","...KCCW....WCCK...",
+            "..KCCW......WCCK..","..KCCWWWWWWWWCCK..","...KCC..RR..CCK...",
+            "....KCC.RR.CCK....",".....KCCRRCCK.....","......KCCCCK......",
+            ".......KCCK.......","......KCCCCK......",".....KCCWWCCK.....",
+            "....KCCW..WCCK....","...KCCW....WCCK...","..KCCW......WCCK..",
+            ".KKKK........KKKK.","KK..............KK"
+        ],
+    }
+    palette = {
+        ".": None, "K": (4, 7, 17), "C": (23, 65, 82),
+        "W": (118, 224, 229), "R": (246, 79, 145),
+        "G": (21, 57, 48), "L": (83, 164, 116),
+        "B": (9, 24, 29),
+    }
+    # One distinctive hand-pixeled detail per camera segment; positions vary
+    # to avoid a repeated stamp pattern and are kept above the combat lane.
+    for seg, sx in enumerate((0, 205, 410, 615, 820, 1025, 1230)):
+        rows = pixel_sprites[chapter]
+        px = sx + (151 if seg % 2 == 0 else 163)
+        py = 25 + ((seg * 7 + chapter * 3) % 13)
+        for ry, row in enumerate(rows):
+            for rx, key in enumerate(row):
+                color = palette[key]
+                if color is None:
+                    continue
+                # Material highlights are tinted by the chapter lighting.
+                if key == "W" and (seg + chapter) % 2:
+                    color = t["cyan"]
+                elif key == "R":
+                    color = t["pink"]
+                elif key == "G":
+                    color = lerp((21, 57, 48), t["far"], .18)
+                rect(d, (px+rx, py+ry, px+rx, py+ry), color)
+        # A tiny cast shadow and reflected light anchor the sprite to the scene.
+        rect(d, (px+2, py+20, px+17, py+21), (5, 8, 17))
+        rect(d, (px+5, py+22, px+13, py+22), lerp(t["street"], t["cyan"], .35))
+
     # Fine pixel grain is clustered by architectural edge, never random full-frame noise.
     for seg, x in enumerate((0,205,410,615,820,1025,1230)):
         for k in range(13):
