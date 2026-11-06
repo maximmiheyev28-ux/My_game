@@ -127,7 +127,8 @@ process_anchors = [
         _background.position.x = sin(_anim_clock * 0.34) * 2.5
 """,
     """    if is_instance_valid(_background):
-        _background.position = Vector2(sin(_anim_clock * 0.23) * 1.8, sin(_anim_clock * 0.37) * 0.8)"""
+        _background.position = Vector2(sin(_anim_clock * 0.23) * 1.8, sin(_anim_clock * 0.37) * 0.8)
+"""
 ]
 if "_foreground.position.x = sin(_anim_clock" not in source:
     for process_anchor in process_anchors:
