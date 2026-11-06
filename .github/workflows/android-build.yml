@@ -153,7 +153,7 @@ jobs:
           assert "visual.scale = Vector2(0.72, 0.72)" in player_source, "Hero scale regression: expected slightly smaller 0.72 scale"
           assert "visual.position.y = -36.0" in player_source, "Hero vertical anchor regression"
           ambient=Path("scripts/fx/background_motion.gd").read_text(encoding="utf-8")
-          assert "range(110)" in ambient and "range(28)" in ambient and "range(48)" in ambient and "range(14)" in ambient, "Ambient animation density regression"
+          assert "range(210)" in ambient and "range(58)" in ambient and "range(84)" in ambient and "range(24)" in ambient, "Ambient animation density regression"
           cinematic=Path("scripts/fx/cinematic_fx.gd").read_text(encoding="utf-8")
           assert "range(40)" in cinematic and "range(6)" in cinematic, "Cinematic particle density regression"
           assert "for drop_index in range(10):" in Path("scripts/levels/level.gd").read_text(encoding="utf-8"), "Environmental debris density regression"
