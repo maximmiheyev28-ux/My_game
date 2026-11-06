@@ -353,42 +353,48 @@ BOSSES = {
 }
 ACTOR_PALETTE = dict(PALETTE)
 def make_actor(rows, size, frame, kind, boss=False):
-    # Draw at source pixel resolution, then enlarge with nearest-neighbour.
-    im=Image.new("RGBA",size,(0,0,0,0)); d=ImageDraw.Draw(im)
+    # Trim transparent map margins, keep square source pixels, and scale with nearest-neighbour.
+    rows=[row.strip(".") for row in rows]
+    if boss:
+        # The boss maps are designed as compact pixel sketches; duplicate rows
+        # to expand the vertical anatomy while retaining square pixel clusters.
+        rows=[row for row in rows for _ in range(2)]
     maxw=max(map(len,rows)); maxh=len(rows)
-    sx=max(1,(size[0]-4)//maxw); sy=max(1,(size[1]-4)//maxh)
-    ox=(size[0]-maxw*sx)//2; oy=(size[1]-maxh*sy)//2
-    palette=ACTOR_PALETTE
+    cell=max(1,min((size[0]-4)//maxw,(size[1]-4)//maxh))
+    im=Image.new("RGBA",size,(0,0,0,0)); d=ImageDraw.Draw(im)
+    ox=(size[0]-maxw*cell)//2; oy=(size[1]-maxh*cell)//2
     for y,row in enumerate(rows):
         for x,ch in enumerate(row):
-            c=palette.get(ch)
-            if c is None: continue
-            # Animation changes only purposeful clusters: scarf, weapon, eye and armor glints.
-            if ch=="p" and frame%3==1: c=(248,105,169)
-            if ch=="c" and frame%2: c=(130,242,250)
-            if ch=="w" and frame in (2,3): c=(255,225,164)
-            xx=ox+x*sx; yy=oy+y*sy
-            d.rectangle((xx,yy,xx+sx-1,yy+sy-1),fill=(*c,255))
+            col=ACTOR_PALETTE.get(ch)
+            if col is None: continue
+            # Animation changes small authored highlight clusters, not whole-body geometry.
+            if ch=="p" and frame%3==1: col=(248,105,169)
+            if ch=="c" and frame%2: col=(130,242,250)
+            if ch=="w" and frame in (2,3): col=(255,225,164)
+            xx=ox+x*cell; yy=oy+y*cell
+            d.rectangle((xx,yy,xx+cell-1,yy+cell-1),fill=(*col,255))
     if boss:
-        # Distinctive silhouette notch / energy rune animates in a six-frame cycle.
+        # A tiny rune shifts along a six-frame pulse while the silhouette stays anchored.
         x=size[0]//2+(frame%3-1)*2; y=size[1]//3
-        d.line((x-3,y,x+3,y),fill=(130,240,255,255),width=2)
+        d.point((x,y),fill=(130,240,255,255))
+        d.point((x+1,y),fill=(130,240,255,255))
     else:
-        # Weapon or scarf pixel changes position without moving the body's pivot.
-        x=size[0]-4-(frame%3)*2; y=size[1]//2+frame%2
+        # Individual blade / scarf glint advances one pixel at a time.
+        x=size[0]-5-(frame%3); y=size[1]//2+frame%2
         d.point((x,y),fill=(255,124,181,255))
     return im
+
 def save_animation():
     # Four enemy silhouettes, six idle/combat frames each.
     for kind,rows in ACTORS.items():
         for i in range(6):
-            frame=make_actor(rows,(48,62),i,kind)
+            frame=make_actor(rows,(60,64),i,kind)
             frame.save(CH/f"{kind}_{i}.png",optimize=True)
             if i==0: frame.save(CH/f"{kind}.png",optimize=True)
     # Six large boss sprites; each design has a separate hand-authored silhouette.
     for kind,rows in BOSSES.items():
         for i in range(6):
-            frame=make_actor(rows,(88,104),i,kind,True)
+            frame=make_actor(rows,(96,112),i,kind,True)
             frame.save(CH/f"boss_{kind}_{i}.png",optimize=True)
             if i==0: frame.save(CH/f"boss_{kind}.png",optimize=True)
 
