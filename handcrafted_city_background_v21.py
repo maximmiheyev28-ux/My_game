@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import random
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "assets" / "backgrounds"
@@ -197,6 +197,7 @@ def chapter_scene(chapter):
         building(d,x,94,width,height,shade,lerp(shade,t["pink"],.12),lerp(shade,t["warm"],.30),rng.randrange(1_000_000),rng.randrange(4))
         x+=width+rng.randint(3,9)
     # Distinct chapter landmarks, composed by hand rather than generic repeated props.
+    landmark_base = im.copy()
     if chapter==0:  # neon shopping alley
         signboard(im,58,48,38,15,t["pink"],t["cyan"],11)
         signboard(im,188,58,28,11,t["cyan"],t["pink"],12)
@@ -277,6 +278,15 @@ def chapter_scene(chapter):
             line(d,[(x,36),(x+3,92)],(9,12,28),3)
             line(d,[(x-8,43),(x+12,43)],(9,12,28),2)
         signboard(im,162,60,42,13,t["pink"],t["cyan"],16)
+    # The landmark motif is intentionally repeated across the long panorama,
+    # instead of being stranded in the first 240 logical pixels.
+    landmark_pixels = ImageChops.difference(im.convert("RGB"), landmark_base.convert("RGB"))
+    landmark_mask = landmark_pixels.convert("L").point(lambda p: 255 if p else 0)
+    landmark_layer = im.copy()
+    landmark_layer.putalpha(landmark_mask)
+    for offset in (280, 560, 840, 1120):
+        im.alpha_composite(landmark_layer, dest=(offset, 0))
+    d = ImageDraw.Draw(im)
     # A handful of deliberately placed service details: AC units, ducts, fire escapes.
     for idx,x in enumerate((18,76,137,204)):
         y=77+(idx%2)*5
