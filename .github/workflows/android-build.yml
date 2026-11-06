@@ -130,6 +130,8 @@ jobs:
           python3 visual_upgrade_v3.py
           python3 -m py_compile refine_backgrounds.py
           python3 refine_backgrounds.py
+          python3 -m py_compile handcrafted_city_background_v21.py
+          python3 handcrafted_city_background_v21.py
           python3 -m py_compile refine_enemy_ai.py
           python3 refine_enemy_ai.py
           python3 -m py_compile visual_combat_polish.py
