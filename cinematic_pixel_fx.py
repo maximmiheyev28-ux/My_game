@@ -25,6 +25,19 @@ for frame_index in range(8):
     draw.arc((cx - 35, cy - 26, cx + 35, cy + 26), start=start_angle + 5,
              end=end_angle - 5, fill=(238, 250, 255, 255), width=1)
 
+    # A stepped diagonal blade trail gives the impact a strong readable silhouette.
+    slash_end_x = 18 + round(progress * 88)
+    slash_end_y = 62 - round(progress * 44)
+    slash_points = []
+    for step in range(13):
+        t = step / 12.0
+        px = 18 + round((slash_end_x - 18) * t)
+        py = 62 - round((62 - slash_end_y) * t) + (1 if step % 2 else 0)
+        slash_points.append((px, py))
+    draw.line(slash_points, fill=(255, 56, 164, 225), width=5)
+    draw.line(slash_points, fill=(66, 215, 255, 255), width=3)
+    draw.line(slash_points, fill=(242, 251, 255, 255), width=1)
+
     # Break the smooth curves into visible pixel notches and flying fragments.
     for spark_index in range(11):
         t = (spark_index + 0.5) / 11.0
@@ -45,8 +58,8 @@ for frame_index in range(8):
     # A short impact core blooms only in the middle frames.
     if 2 <= frame_index <= 5:
         alpha = 255 if frame_index in (3, 4) else 175
-        draw.rectangle((cx - 3, cy - 2, cx + 3, cy + 2), fill=(235, 251, 255, alpha))
-        draw.rectangle((cx - 1, cy - 4, cx + 1, cy + 4), fill=(255, 94, 184, alpha))
+        draw.rectangle((slash_end_x - 3, slash_end_y - 2, slash_end_x + 3, slash_end_y + 2), fill=(235, 251, 255, alpha))
+        draw.rectangle((slash_end_x - 1, slash_end_y - 4, slash_end_x + 1, slash_end_y + 4), fill=(255, 94, 184, alpha))
     image.save(FX / f"cutscene_slash_{frame_index}.png", optimize=True)
 
 frames = [Image.open(FX / f"cutscene_slash_{i}.png").convert("RGBA") for i in range(8)]
