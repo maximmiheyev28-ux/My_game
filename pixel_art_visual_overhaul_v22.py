@@ -603,32 +603,82 @@ def write_backgrounds():
         save_foreground(ch)
         signatures.add(im.resize((140,12),Image.Resampling.NEAREST).tobytes())
     assert len(signatures)==6,"Chapter scenes must be visually distinct"
+def cinematic_panel(ch):
+    """A dedicated 16:9 pixel-art establishing shot; never stretch a 1400x120 panorama."""
+    t=THEMES[ch]; rng=random.Random(8800+ch*71)
+    im=Image.new("RGB",(320,180),t["sky"]); d=ImageDraw.Draw(im)
+    for y in range(180):
+        amt=min(1.0,y/142.0)
+        col=mix(t["sky"],t["haze"],amt*.78)
+        if y>112: col=mix(t["haze"],t["street"],(y-112)/68)
+        d.line((0,y,319,y),fill=col)
+    # Sparse cloud fragments and distant signal lights on the upper third.
+    for i in range(28):
+        x=(i*43+ch*29)%320; y=13+(i*17)%66
+        if i%4==0:
+            d.point((x,y),fill=mix(t["haze"],t["moon"],.22))
+            d.point((x+1,y),fill=mix(t["haze"],t["moon"],.22))
+        elif i%3==0:
+            d.line((x,y,x+3+(i%5),y),fill=mix(t["sky"],t["haze"],.56),width=1)
+    # Distant towers use thin, staggered pixel courses to leave clear negative space.
+    x=-8
+    while x<328:
+        bw=rng.randint(13,27); bh=rng.randint(26,62); top=118-bh
+        body=mix(t["far"],t["haze"],.12)
+        for yy in range(bh):
+            inset=(3 if yy<2 else 1 if yy<5 else 0) if (x//17+ch)%3==0 else (1 if yy<3 else 0)
+            for xx in range(inset,bw-inset):
+                color=mix(body,t["sky"],.24) if xx==bw-inset-1 else body
+                d.point((x+xx,top+yy),fill=color)
+        for wy in range(top+8,116,8):
+            for wx in range(x+3,x+bw-3,5):
+                if rng.random()<.28:
+                    color=t["warm"] if rng.random()<.25 else mix(body,t["cyan"],.36)
+                    d.point((wx,wy),fill=color)
+                    if rng.random()<.4: d.point((wx+1,wy),fill=color)
+        x+=bw+rng.randint(3,8)
+    # Landmark compositions are distinct and are drawn from authored pixel maps.
+    tint={"c":t["cyan"],"p":t["pink"],"w":t["warm"]}
+    setpieces={
+      0:[("shop",49,61,3),("train",185,83,2)],
+      1:[("furnace",48,58,3),("crane",188,58,2)],
+      2:[("ship",34,101,3),("crane",188,52,2)],
+      3:[("tower",92,17,3),("radar",208,76,2)],
+      4:[("tree",52,73,4),("greenhouse",176,92,2)],
+      5:[("radar",47,67,3),("relay",196,49,2)]
+    }[ch]
+    for name,sx,sy,scale in setpieces: draw_map(im,sx,sy,MAPS[name],tint,scale)
+    d=ImageDraw.Draw(im)
+    # Foreground silhouettes anchor the shot, with broken curb reflections and cable ends.
+    d.line((0,148,319,148),fill=mix(t["near"],t["cyan"],.20),width=1)
+    for x in range(0,320,29):
+        height=6+(x*7+ch*11)%20
+        for yy in range(180-height,180):
+            d.point((x,yy),fill=mix(t["street"],t["near"],.34))
+            if x%3==0: d.point((x+1,yy),fill=mix(t["street"],t["near"],.25))
+        if x%2==0:
+            d.point((x+2,180-height),fill=mix(t["near"],t["cyan"],.18))
+    for i in range(35):
+        x=(i*47+ch*13)%318; y=151+(i*7)%26
+        c=mix(t["street"],t["cyan"] if i%2 else t["pink"],.22 if i%3 else .42)
+        d.line((x,y,min(319,x+2+(i*5)%10),y),fill=c,width=1)
+    # A few close rain streaks and deliberate neon glints finish the composition.
+    for i in range(25):
+        x=(i*61+ch*23)%319; y=30+(i*19)%110
+        if i%3==0: d.point((x,y),fill=mix(t["sky"],t["cyan"],.72))
+    d.point((160,145),fill=t["warm"])
+    d.point((161,145),fill=t["warm"])
+    return im
+
 def write_cinematics():
-    # Six original panels at 320x180 in one nearest-neighbour atlas.
-    atlas=Image.new("RGB",(960,180),(5,8,19))
-    for ch,t in enumerate(THEMES):
-        panel=Image.new("RGB",(320,180),t["sky"]); d=ImageDraw.Draw(panel)
-        for y in range(180):
-            c=mix(t["sky"],t["haze"],y/180*.7)
-            d.line((0,y,320,y),fill=c)
-        # Layered silhouette echoes the chapter's signature landmark at cinematic scale.
-        scene=chapter_scene(ch)
-        scene=scene.resize((320,180),Image.Resampling.NEAREST)
-        panel.paste(scene,(0,0))
-        d=ImageDraw.Draw(panel)
-        for i in range(42):
-            x=(i*37+ch*19)%320; y=(i*17+ch*11)%165
-            if i%3==0: d.point((x,y),fill=t["cyan"])
-        atlas.paste(panel,(ch%3*320,ch//3*0))
-    # Atlas rows represent chapter triptychs; each panel is independently addressable.
+    """Build six hand-composed 320x180 shots in the 3x2 atlas expected by Godot."""
     atlas=Image.new("RGB",(960,360),(5,8,19))
     for ch in range(6):
-        panel=Image.new("RGB",(320,180),THEMES[ch]["sky"])
-        scene=chapter_scene(ch).resize((320,180),Image.Resampling.NEAREST)
-        panel.paste(scene,(0,0))
+        panel=cinematic_panel(ch)
         atlas.paste(panel,((ch%3)*320,(ch//3)*180))
     out=ROOT/"assets/cinematics"; out.mkdir(parents=True,exist_ok=True)
-    atlas.save(out/"cutscene_atlas.webp",quality=96,method=6)
+    # Lossless WebP preserves the intentional single-pixel clusters.
+    atlas.save(out/"cutscene_atlas.webp",lossless=True,method=6)
 def validate():
     from PIL import ImageStat
     for ch in range(6):
