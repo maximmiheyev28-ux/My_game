@@ -128,10 +128,6 @@ jobs:
           set -euo pipefail
           python3 -m py_compile visual_upgrade_v3.py
           python3 visual_upgrade_v3.py
-          python3 -m py_compile refine_backgrounds.py
-          python3 refine_backgrounds.py
-          python3 -m py_compile handcrafted_city_background_v21.py
-          python3 handcrafted_city_background_v21.py
           python3 -m py_compile refine_enemy_ai.py
           python3 refine_enemy_ai.py
           python3 -m py_compile visual_combat_polish.py
@@ -191,6 +187,13 @@ jobs:
           python3 environmental_weather_v19.py
           python3 -m py_compile hero_sprite_overhaul_v20.py
           python3 hero_sprite_overhaul_v20.py
+
+          # v2.2 is the final art pass: all chapter backgrounds, enemy/boss sprites,
+          # pixel-weather sheets and cinematic panels are authored on a native pixel grid.
+          test -s .source/visual-v22/pixel_art_visual_overhaul_v22.py.gz.b64
+          base64 --decode .source/visual-v22/pixel_art_visual_overhaul_v22.py.gz.b64 | gzip -dc > pixel_art_visual_overhaul_v22.py
+          python3 -m py_compile pixel_art_visual_overhaul_v22.py
+          python3 pixel_art_visual_overhaul_v22.py
 
 
       - name: Package restored project for visual overhaul
