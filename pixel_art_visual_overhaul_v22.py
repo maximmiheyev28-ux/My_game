@@ -287,6 +287,210 @@ def draw_skyline(im, chapter, t):
             d.point((ax,ay+1),fill=wall_shadow); d.point((ax+1,ay+1),fill=cool_light)
             d.line((ax+1,ay+2,ax+1,ay+4),fill=wall_shadow,width=1)
         x+=bw+rng.randint(4,11)
+def draw_street_frontage(im, chapter, t):
+    """Compose a continuous, district-specific street with non-repeating buildings and lived-in details."""
+    rng=random.Random(14600+chapter*733)
+    d=ImageDraw.Draw(im)
+    # Each chapter has a different urban function, street furniture language and facade materials.
+    districts=[
+      {"materials":[(35,43,61),(54,52,65),(24,35,53),(74,54,67)],"accent":t["pink"],"kind":"night market"},
+      {"materials":[(61,42,38),(45,39,43),(79,53,43),(33,38,45)],"accent":t["warm"],"kind":"foundry row"},
+      {"materials":[(24,52,62),(30,66,72),(42,56,65),(19,43,55)],"accent":t["cyan"],"kind":"harbor street"},
+      {"materials":[(39,34,66),(53,39,72),(31,32,57),(69,43,76)],"accent":t["pink"],"kind":"neon arcade"},
+      {"materials":[(38,57,56),(53,66,63),(36,47,61),(67,66,57)],"accent":t["cyan"],"kind":"overgrown quarter"},
+      {"materials":[(51,37,57),(67,42,57),(38,35,55),(76,49,62)],"accent":t["pink"],"kind":"signal district"}
+    ][chapter]
+    # A continuous row of attached buildings; widths and rooflines vary, no repeated modular pattern.
+    x=-18
+    building=0
+    while x<W+20:
+        bw=rng.randint(82,166)
+        top=rng.randint(38,59)
+        base=104+rng.randint(-2,2)
+        wall=rng.choice(districts["materials"])
+        shadow=mix(wall,t["sky"],.48)
+        edge=mix(wall,t["moon"],.24)
+        # Individual roof silhouette: parapet, sloped cap, setback, or rooftop room.
+        roof=rng.randrange(5)
+        if roof==0:
+            d.rectangle((x,top+4,x+bw,base),fill=wall)
+            d.line((x,top+4,x+bw,top+4),fill=edge,width=2)
+            d.rectangle((x+8,top-2,x+bw-10,top+3),fill=shadow)
+        elif roof==1:
+            d.rectangle((x+5,top,x+bw-3,base),fill=wall)
+            d.line((x+5,top,x+bw-3,top),fill=edge,width=2)
+            d.rectangle((x+14,top-5,x+bw-18,top-1),fill=shadow)
+        elif roof==2:
+            d.rectangle((x,top+8,x+bw,base),fill=wall)
+            d.rectangle((x+3,top+2,x+bw-8,top+7),fill=shadow)
+            d.line((x+3,top+2,x+bw-8,top+2),fill=edge)
+        elif roof==3:
+            d.rectangle((x,top+3,x+bw,base),fill=wall)
+            d.rectangle((x+bw//2,top-7,x+bw-8,top+2),fill=shadow)
+            d.line((x+bw//2,top-7,x+bw-8,top-7),fill=edge)
+        else:
+            d.rectangle((x+2,top+5,x+bw-2,base),fill=wall)
+            for sx in range(x+4,x+bw-8,11):
+                d.point((sx,top+3),fill=edge)
+        # Facade seams, water stains and patched masonry form irregular texture clusters.
+        for yy in range(top+9,base-4,7):
+            if rng.random()<.52:
+                xx=x+rng.randint(4,max(5,bw-16))
+                d.line((xx,yy,min(x+bw-4,xx+rng.randint(5,19)),yy),fill=shadow)
+            if rng.random()<.25:
+                xx=x+rng.randint(4,max(5,bw-8))
+                d.line((xx,yy,xx, min(base-3,yy+rng.randint(3,10))),fill=mix(wall,t["sky"],.25))
+        # Upper windows: each bay has a dark inset, sill, reflection and occasional lit room.
+        window_y=top+rng.randint(12,19)
+        while window_y<82:
+            for wx in range(x+10,x+bw-10,rng.choice((17,19,23,27))):
+                ww=rng.randint(6,11); wh=rng.randint(7,12)
+                d.rectangle((wx,window_y,wx+ww,window_y+wh),fill=shadow)
+                d.line((wx,window_y+wh,wx+ww,window_y+wh),fill=edge)
+                d.line((wx+2,window_y+2,wx+2,window_y+wh-2),fill=mix(t["cyan"],wall,.46))
+                if rng.random()<.44:
+                    glow=rng.choice((t["warm"],t["cyan"],t["pink"]))
+                    d.rectangle((wx+3,window_y+2,wx+ww-2,window_y+wh-2),fill=mix(glow,wall,.35))
+                    d.point((wx+3,window_y+2),fill=mix(glow,(255,255,230),.35))
+                if rng.random()<.28:
+                    d.line((wx-1,window_y+wh+2,wx+ww+1,window_y+wh+2),fill=shadow,width=2)
+            window_y+=rng.randint(15,21)
+        # Street-level use differs per building: shop, service door, loading bay or shutter.
+        frontage=rng.randrange(5)
+        door_x=x+rng.randint(9,max(10,bw-24))
+        if frontage==0:
+            # Glass shopfront with a deep frame, counter silhouette and uneven awning.
+            d.rectangle((door_x,78,door_x+20,base),fill=shadow)
+            d.rectangle((door_x+2,80,door_x+18,96),fill=mix(t["cyan"],wall,.52))
+            d.line((door_x+2,82,door_x+17,82),fill=t["moon"])
+            d.rectangle((door_x-3,74,door_x+23,77),fill=districts["accent"])
+            for ax in range(door_x-2,door_x+24,5):
+                d.line((ax,74,ax+2,78),fill=mix(districts["accent"],t["moon"],.24))
+            d.rectangle((door_x+3,98,door_x+17,base-2),fill=shadow)
+        elif frontage==1:
+            # Heavy industrial shutter, with ribs and a warning lamp.
+            d.rectangle((door_x,80,door_x+25,base),fill=shadow)
+            for sy in range(83,base-2,4):
+                d.line((door_x+2,sy,door_x+23,sy),fill=mix(wall,t["moon"],.16))
+            d.point((door_x+22,78),fill=t["warm"])
+        elif frontage==2:
+            # Recessed residential entrance, lintel and offset steps.
+            d.rectangle((door_x,78,door_x+13,base),fill=shadow)
+            d.rectangle((door_x+3,82,door_x+10,base-2),fill=mix(wall,t["sky"],.30))
+            d.point((door_x+9,91),fill=t["warm"])
+            d.line((door_x-4,base-4,door_x+17,base-4),fill=edge)
+            d.line((door_x-7,base-1,door_x+19,base-1),fill=edge)
+        elif frontage==3:
+            # Deep loading arch and stacked crates.
+            d.rectangle((door_x,79,door_x+24,base),fill=shadow)
+            d.rectangle((door_x+3,83,door_x+21,base),fill=mix(wall,t["sky"],.32))
+            d.rectangle((door_x+27,91,door_x+36,base-2),fill=shadow)
+            d.line((door_x+28,94,door_x+35,94),fill=edge)
+        else:
+            # Narrow service window and a patched metal door.
+            d.rectangle((door_x,82,door_x+12,base),fill=shadow)
+            d.rectangle((door_x+2,85,door_x+9,91),fill=mix(t["cyan"],wall,.65))
+            d.point((door_x+9,98),fill=t["warm"])
+        # Signs are unique per building in size, placement and neon hue.
+        if rng.random()<.78:
+            sy=rng.randint(68,75); sx=x+rng.randint(8,max(9,bw-36))
+            sw=rng.randint(18,min(43,max(19,bw-12)))
+            sign=rng.choice((t["pink"],t["cyan"],t["warm"]))
+            d.rectangle((sx-2,sy-2,sx+sw,sy+3),fill=shadow)
+            d.line((sx,sy-1,sx+sw-2,sy-1),fill=sign,width=2)
+            for q in range(sx+2,sx+sw-2,4):
+                d.point((q,sy+1),fill=mix(sign,t["moon"],.34))
+        # Chapter-specific urban infrastructure: pipes, balconies, cables and exhausts.
+        detail=rng.randrange(6)
+        if detail==0:
+            px=x+bw-8
+            d.line((px,top+7,px,base-2),fill=shadow,width=2)
+            for py in range(top+15,base-5,13):
+                d.line((px-2,py,px+2,py),fill=edge)
+        elif detail==1 and bw>100:
+            bx=x+rng.randint(18,bw-35); by=top+27
+            d.line((bx,by,bx+27,by),fill=edge)
+            d.line((bx,by,bx,by+8),fill=edge)
+            d.line((bx+27,by,bx+27,by+8),fill=edge)
+            d.line((bx-3,by+8,bx+30,by+8),fill=shadow,width=2)
+            d.point((bx+4,by-2),fill=t["cyan"])
+        elif detail==2:
+            ax=x+rng.randint(12,max(13,bw-18)); ay=top+31
+            d.rectangle((ax,ay,ax+8,ay+5),fill=shadow)
+            d.line((ax+2,ay+2,ax+7,ay+2),fill=edge)
+            d.line((ax+4,ay+5,ax+4,ay+10),fill=shadow)
+        elif detail==3:
+            # Fire escape with broken landings, not a repeated full-height ladder.
+            ex=x+bw-13
+            d.line((ex,top+16,ex,base-7),fill=shadow)
+            for fy in range(top+24,base-7,17):
+                d.line((ex-7,fy,ex+2,fy),fill=edge)
+                d.point((ex-7,fy-1),fill=shadow)
+        elif detail==4:
+            # Roof exhaust and a drifting steam tuft.
+            vx=x+rng.randint(12,max(13,bw-15)); vy=top-3
+            d.rectangle((vx,vy,vx+7,top+2),fill=shadow)
+            d.line((vx+2,vy-3,vx+2,vy-7),fill=edge)
+            d.point((vx+5,vy-9),fill=mix(t["haze"],t["moon"],.42))
+        else:
+            # Exterior cable loop and a junction box.
+            cx=x+rng.randint(10,max(11,bw-12)); cy=top+9
+            d.line((cx,cy,cx+5,cy+5,cx+11,cy+2),fill=shadow)
+            d.rectangle((cx+9,cy+3,cx+13,cy+7),fill=edge)
+        # Small lived-in clutter at the threshold: bins, crates, bags and a bike silhouette.
+        if rng.random()<.55:
+            bx=x+rng.randint(7,max(8,bw-12))
+            d.rectangle((bx,base-9,bx+6,base-2),fill=shadow)
+            d.line((bx+1,base-8,bx+5,base-8),fill=mix(t["cyan"],wall,.35))
+        if rng.random()<.30:
+            bx=x+rng.randint(10,max(11,bw-22))
+            d.ellipse((bx,base-7,bx+5,base-2),outline=shadow)
+            d.ellipse((bx+13,base-7,bx+18,base-2),outline=shadow)
+            d.line((bx+2,base-5,bx+10,base-9,bx+15,base-5),fill=edge)
+        # Narrow gaps contain drainpipes, fireproof joints and scraps of reflected light.
+        d.line((x+bw,top+7,x+bw,base),fill=shadow)
+        x+=bw-2
+        building+=1
+    # Continuous sidewalk, curb and asphalt bind the separate facades into one street.
+    d.rectangle((0,105,W-1,109),fill=mix(t["near"],t["moon"],.10))
+    d.line((0,105,W-1,105),fill=mix(t["near"],t["cyan"],.30))
+    d.rectangle((0,110,W-1,H-1),fill=t["street"])
+    for x0 in range(0,W,37):
+        if rng.random()<.72:
+            y=112+rng.randrange(2,7)
+            d.line((x0,y,min(W-1,x0+rng.randint(5,21)),y),fill=mix(t["street"],t["moon"],.16))
+    # District signatures: waterfront bollards, foundry pipes, garden growth, or transit markings.
+    if chapter==0:
+        for bx in (96,418,887,1248):
+            d.rectangle((bx,100,bx+3,109),fill=(75,67,79))
+            d.point((bx+1,99),fill=t["warm"])
+    elif chapter==1:
+        for bx in (165,503,1018,1320):
+            d.line((bx,95,bx,109),fill=(103,72,54),width=3)
+            d.point((bx+1,94),fill=t["warm"])
+    elif chapter==2:
+        for bx in (112,374,762,1190):
+            d.rectangle((bx,98,bx+7,109),fill=(24,61,70))
+            d.line((bx+1,101,bx+6,101),fill=t["cyan"])
+    elif chapter==3:
+        for bx in (76,342,695,1060,1328):
+            d.line((bx,96,bx+7,109),fill=mix(t["pink"],t["sky"],.38),width=2)
+    elif chapter==4:
+        for bx in (138,457,825,1166):
+            d.line((bx,101,bx+2,92,bx+5,101),fill=(60,105,75),width=2)
+            d.point((bx+3,91),fill=(107,163,105))
+    else:
+        for bx in (128,451,793,1162):
+            d.rectangle((bx,101,bx+9,108),fill=(50,42,65))
+            d.point((bx+4,100),fill=t["pink"])
+    # Overhead service cables are sagged and interrupted, not a repeated decorative stripe.
+    for x0 in (35,286,611,944,1260):
+        y0=rng.randint(13,25)
+        d.line((x0,y0,x0+65,y0+5,x0+143,y0+2),fill=mix(t["sky"],t["moon"],.32))
+        if chapter in (0,3,5):
+            d.point((x0+66,y0+5),fill=t["cyan"])
+    return building
+
 def chapter_scene(ch):
     t=THEMES[ch]; rng=random.Random(3200+ch*901)
     im=Image.new("RGB",(W,H),t["sky"]); d=ImageDraw.Draw(im)
@@ -300,18 +504,8 @@ def chapter_scene(ch):
         d.line((x,y,x+8+(i%9)*3,y),fill=mix(t["sky"],t["haze"],.45),width=1)
         if i%5==0: d.point((x+3,y+2),fill=t["cyan"])
     draw_skyline(im,ch,t)
-    # Seven authored object placements per chapter; each uses a pixel map, not a primitive proxy.
-    props = {
-      0:[("shop",34,37,2),("train",260,43,1),("vending",525,65,2),("tower",790,14,2),("dish",1120,49,2)],
-      1:[("furnace",28,29,2),("crane",282,17,2),("dock",555,49,2),("antenna",850,42,2),("ship",1110,53,2)],
-      2:[("ship",30,51,2),("crane",270,18,2),("dock",525,57,2),("radar",810,42,2),("tower",1110,14,2)],
-      3:[("tower",28,9,3),("radar",300,39,2),("shop",570,43,2),("relay",850,20,2),("crane",1120,17,2)],
-      4:[("tree",48,56,2),("greenhouse",270,54,2),("dish",560,52,2),("vending",850,59,2),("tower",1110,13,2)],
-      5:[("relay",42,23,2),("radio",295,32,2),("antenna",550,54,2),("tower",830,15,2),("dish",1110,50,2)]
-    }[ch]
-    for name,x,y,scale in props:
-        tint={"c":t["cyan"],"p":t["pink"],"w":t["warm"]}
-        draw_map(im,x,y,MAPS[name],tint,scale)
+    # A continuous street frontage replaces isolated, evenly spaced landmark props.
+    draw_street_frontage(im,ch,t)
     # Ground plane: layered curb, rail glints and reflection streaks with irregular breaks.
     d=ImageDraw.Draw(im)
     d.rectangle((0,92,W,119),fill=t["street"])
