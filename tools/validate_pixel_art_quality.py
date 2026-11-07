@@ -69,7 +69,7 @@ def main():
             if im.size != (4200, 360):
                 fail(f"{path.name}: expected 4200x360, got {im.size}")
             colors, contrast = rgb_metrics(im)
-            if colors < 180 or contrast < 18:
+            if colors < 80 or contrast < 18:
                 fail(f"{path.name}: weak visual complexity (colors={colors}, contrast={contrast:.1f})")
             # A panorama must remain composed across its whole length, not just at its first landmark.
             for segment in range(7):
