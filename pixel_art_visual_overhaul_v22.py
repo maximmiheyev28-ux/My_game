@@ -348,10 +348,10 @@ def draw_street_frontage(im, chapter, t):
                 d.rectangle((wx,window_y,wx+ww,window_y+wh),fill=shadow)
                 d.line((wx,window_y+wh,wx+ww,window_y+wh),fill=edge)
                 d.line((wx+2,window_y+2,wx+2,window_y+wh-2),fill=mix(t["cyan"],wall,.46))
-                if rng.random()<.44:
+                if rng.random()<.64:
                     glow=rng.choice((t["warm"],t["cyan"],t["pink"]))
-                    d.rectangle((wx+3,window_y+2,wx+ww-2,window_y+wh-2),fill=mix(glow,wall,.35))
-                    d.point((wx+3,window_y+2),fill=mix(glow,(255,255,230),.35))
+                    d.rectangle((wx+3,window_y+2,wx+ww-2,window_y+wh-2),fill=mix(glow,wall,.14))
+                    d.point((wx+3,window_y+2),fill=mix(glow,(255,255,245),.12))
                 if rng.random()<.28:
                     d.line((wx-1,window_y+wh+2,wx+ww+1,window_y+wh+2),fill=shadow,width=2)
             window_y+=rng.randint(15,21)
@@ -392,7 +392,7 @@ def draw_street_frontage(im, chapter, t):
             d.rectangle((door_x+2,85,door_x+9,91),fill=mix(t["cyan"],wall,.65))
             d.point((door_x+9,98),fill=t["warm"])
         # Signs are unique per building in size, placement and neon hue.
-        if rng.random()<.78:
+        if rng.random()<.92:
             sy=rng.randint(68,75); sx=x+rng.randint(8,max(9,bw-36))
             sw=rng.randint(18,min(43,max(19,bw-12)))
             sign=rng.choice((t["pink"],t["cyan"],t["warm"]))
@@ -455,10 +455,20 @@ def draw_street_frontage(im, chapter, t):
     d.rectangle((0,105,W-1,109),fill=mix(t["near"],t["moon"],.10))
     d.line((0,105,W-1,105),fill=mix(t["near"],t["cyan"],.30))
     d.rectangle((0,110,W-1,H-1),fill=t["street"])
-    for x0 in range(0,W,37):
-        if rng.random()<.72:
-            y=112+rng.randrange(2,7)
-            d.line((x0,y,min(W-1,x0+rng.randint(5,21)),y),fill=mix(t["street"],t["moon"],.16))
+    # Broken puddle rims and neon reflections: irregular, localised highlights rather than repeated stripes.
+    for i in range(86):
+        x0=rng.randrange(W); y0=rng.randrange(111,H)
+        length=rng.randint(3,24)
+        hue=rng.choice((t["cyan"],t["pink"],t["warm"],t["moon"]))
+        shade=mix(t["street"],hue,rng.uniform(.20,.58))
+        d.line((x0,y0,min(W-1,x0+length),y0),fill=shade,width=1)
+        if rng.random()<.32 and y0+1<H:
+            d.point((min(W-1,x0+rng.randint(0,length)),y0+1),fill=mix(shade,t["street"],.35))
+    # Curb chips, drain grates and scattered road repairs break the long horizontal plane.
+    for x0 in range(17,W, rng.randint(43,61)):
+        d.line((x0,106,x0+2,108),fill=mix(t["near"],t["moon"],.34))
+        if rng.random()<.42:
+            d.line((x0+5,114,x0+12,114),fill=mix(t["street"],t["moon"],.30))
     # District signatures: waterfront bollards, foundry pipes, garden growth, or transit markings.
     if chapter==0:
         for bx in (96,418,887,1248):
@@ -504,8 +514,6 @@ def chapter_scene(ch):
         d.line((x,y,x+8+(i%9)*3,y),fill=mix(t["sky"],t["haze"],.45),width=1)
         if i%5==0: d.point((x+3,y+2),fill=t["cyan"])
     draw_skyline(im,ch,t)
-    # A continuous street frontage replaces isolated, evenly spaced landmark props.
-    draw_street_frontage(im,ch,t)
     # Ground plane: layered curb, rail glints and reflection streaks with irregular breaks.
     d=ImageDraw.Draw(im)
     d.rectangle((0,92,W,119),fill=t["street"])
@@ -516,6 +524,8 @@ def chapter_scene(ch):
         d.line((x,y,x+1+(i*7)%13,y),fill=color,width=1+(i%4==0))
     for x in range(0,W,91):
         d.line((x,115,x+7,115),fill=mix(t["street"],t["cyan"],.34),width=1)
+    # Composite the continuous frontage last so its sidewalk, doors and curb are not buried by the road pass.
+    draw_street_frontage(im,ch,t)
     # A few foreground cable/roof fragments frame the panoramic composition.
     for x in (20,430,870,1280):
         d.line((x,3,x+46,8,x+94,5),fill=(4,7,16),width=2)
