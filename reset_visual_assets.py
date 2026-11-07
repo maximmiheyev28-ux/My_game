@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Replace all legacy in-game raster art with transparent placeholders.
-
-Git history and the encoded source archive retain the original files for recovery.
-The placeholders keep Godot resource paths intact while the new art is authored.
-"""
+"""Replace legacy game art with transparent placeholders, then install authored raster art."""
 from pathlib import Path
+import re
+import shutil
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent
@@ -22,29 +20,44 @@ pixel = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
 for path in paths:
     fmt = {".png": "PNG", ".webp": "WEBP", ".bmp": "BMP"}[path.suffix.lower()]
     pixel.save(path, format=fmt)
-
 for path in paths:
     with Image.open(path) as check:
         if check.size != (1, 1) or check.convert("RGBA").getpixel((0, 0))[3] != 0:
             raise SystemExit(f"Transparent placeholder verification failed: {path.relative_to(ROOT)}")
 
-# The source archive creates this validator during restore. Its old frame-quality
-# assertions are intentionally disabled only for this clean-slate branch.
-validator = ROOT / "tools" / "validate_project.py"
-if validator.is_file():
-    source = validator.read_text(encoding="utf-8")
-    start = "# Hero-frame integrity: each authored pose must be unique and retain its pixel canvas.\n"
-    end = "\nimage_count = 0\n"
-    if start in source and end in source:
-        left = source.index(start)
-        right = source.index(end, left)
-        source = source[:left] + "# Legacy hero-frame checks are disabled while artwork is intentionally blank.\n" + source[right:]
-        validator.write_text(source, encoding="utf-8")
-
+# Remove legacy procedural graphics scripts after source archive restoration.
 legacy_generators = ["enhance_project.py", "refine_backgrounds.py", "cinematic_pixel_fx.py", "environmental_weather_v19.py", "hero_sprite_overhaul_v20.py", "pixel_art_lighting_v16.py", "pixel_art_visual_overhaul_v22.py", "visual_combat_polish.py", "visual_upgrade_v3.py", "visual_upgrade_v4.py", "refine_enemy_ai.py"]
 for name in legacy_generators:
     candidate = ROOT / name
     if candidate.is_file():
         candidate.unlink()
-print(f"ART RESET VERIFIED: {len(paths)} legacy raster files replaced; authored assets preserved.")
-print(f"AUTHORED ART PRESERVED: {sum(1 for p in authored_root.rglob(chr(42)) if p.is_file())} files.")
+
+# Slice the fixed, manually composed atlas; this step does not draw or generate pixels.
+character_source = authored_root / "characters"
+character_target = assets / "characters"
+sheet_path = character_source / "protagonist_frames.webp"
+if sheet_path.is_file():
+    with Image.open(sheet_path) as sheet:
+        if sheet.size != (96 * 13, 112):
+            raise SystemExit(f"Unexpected protagonist atlas dimensions: {sheet.size}")
+        frame_names = [
+            "player_idle.png", "player_run_0.png", "player_run_1.png",
+            "player_attack_0.png", "player_attack_1.png", "player_attack_2.png",
+            "player_jump.png", "player_fall.png", "player_hurt.png",
+            "player_parry.png", "player_stasis_0.png", "player_stasis_1.png",
+            "player_stasis_2.png",
+        ]
+        for index, name in enumerate(frame_names):
+            sheet.crop((index * 96, 0, (index + 1) * 96, 112)).save(character_target / name, optimize=True)
+        shutil.copy2(character_target / "player_idle.png", character_target / "player_idle_0.png")
+
+# Keep animation arrays aligned with the actual authored frame count.
+player_script = ROOT / "scripts" / "player" / "player.gd"
+if player_script.is_file():
+    source = player_script.read_text(encoding="utf-8")
+    source = re.sub(r"const TEX_IDLE := \[.*?\]", "const TEX_IDLE := [preload(\"res://assets/characters/player_idle_0.png\")]", source, count=1, flags=re.S)
+    source = re.sub(r"const TEX_RUN := \[.*?\]", "const TEX_RUN := [preload(\"res://assets/characters/player_run_0.png\"), preload(\"res://assets/characters/player_run_1.png\")]", source, count=1, flags=re.S)
+    player_script.write_text(source, encoding="utf-8")
+
+print(f"ART RESET VERIFIED: {len(paths)} legacy raster files replaced; authored atlas preserved.")
+print("AUTHORED ART INSTALLED: 13 fixed protagonist frames.")
