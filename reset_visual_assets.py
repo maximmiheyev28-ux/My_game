@@ -64,6 +64,22 @@ if sheet_path.is_file():
             sheet.crop((index * 96, 0, (index + 1) * 96, 112)).save(character_target / name, optimize=True)
         shutil.copy2(character_target / "player_idle.png", character_target / "player_idle_0.png")
 
+# Install the four authored enemy archetypes and their three distinct poses.
+enemy_source = authored_root / "enemies"
+enemy_sheet_path = enemy_source / "enemy_frames.webp"
+if enemy_sheet_path.is_file():
+    with Image.open(enemy_sheet_path) as sheet:
+        if sheet.size != (96 * 12, 112):
+            raise SystemExit(f"Unexpected enemy atlas dimensions: {sheet.size}")
+        enemy_types = ["guard", "shooter", "hunter", "aberration"]
+        for type_index, enemy_type in enumerate(enemy_types):
+            for frame_index in range(3):
+                cell = type_index * 3 + frame_index
+                target = character_target / f"{enemy_type}_{frame_index}.png"
+                sheet.crop((cell * 96, 0, (cell + 1) * 96, 112)).save(target, optimize=True)
+                if frame_index == 0:
+                    shutil.copy2(target, character_target / f"{enemy_type}.png")
+
 # Keep animation arrays aligned with the actual authored frame count.
 player_script = ROOT / "scripts" / "player" / "player.gd"
 if player_script.is_file():

@@ -17,6 +17,13 @@ This commit adds a fixed raster sprite atlas for the protagonist. The atlas is c
 
 Local checks completed: atlas dimensions and alpha channel inspected, extracted frame dimensions checked, reset script executed against the restored source snapshot, and `tools/validate_project.py` passed. Godot runtime playback and the Android build have not yet been verified for this art commit.
 
+## Enemy atlas
+
+- Source: `assets/authored/enemies/enemy_frames.webp`
+- Canvas: 1152 × 112 px, 12 cells of 96 × 112 px.
+- Four distinct archetypes: riot enforcer (`guard`), masked marksman (`shooter`), pale ronin (`hunter`), and bio-mechanical aberration (`aberration`).
+- Each archetype has separate idle, locomotion and attack poses. CI slices the fixed frames into the filenames already loaded by `scripts/enemies/enemy.gd`.
+
 ## Remaining scope
 
 This is an initial protagonist pass, not completion of the game's art or final acceptance. Enemy archetypes, bosses, environments, props, combat effects, UI artwork and animated cinematics still require their own authored pixel-art work and in-game visual review.
