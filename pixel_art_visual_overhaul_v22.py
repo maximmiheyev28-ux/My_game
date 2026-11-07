@@ -511,6 +511,117 @@ def draw_street_frontage(im, chapter, t):
             d.point((x0+66,y0+5),fill=t["cyan"])
     return building
 
+
+def draw_district_landmarks(im, chapter, t):
+    """Add unmistakable, district-specific silhouettes and foreground story details."""
+    d=ImageDraw.Draw(im)
+    ink=(5,8,18); deep=mix(t["near"],t["sky"],.35)
+    steel=mix(t["mid"],t["moon"],.22); rust=mix(t["warm"],(91,48,43),.42)
+    # Landmarks are asymmetrical focal points, not repeated facade modules.
+    if chapter == 0:  # crowded night-market corner and elevated pedestrian bridge
+        d.polygon([(170,54),(192,42),(226,42),(244,52),(244,62),(170,62)],fill=(36,28,48))
+        d.line((170,53,192,41,226,41,244,51),fill=t["pink"],width=2)
+        d.rectangle((181,55,234,67),fill=deep); d.rectangle((188,58,197,66),fill=t["warm"])
+        d.line((205,54,205,91),fill=ink,width=3); d.line((205,55,205,91),fill=steel)
+        d.line((0,35,154,42,270,39),fill=ink,width=3); d.line((0,34,154,41,270,38),fill=t["moon"])
+        for x in (48,89,132,236):
+            d.line((x,38,x,45),fill=ink,width=2); d.rectangle((x-3,45,x+3,51),fill=t["pink"])
+            d.point((x,46),fill=(255,214,164))
+        # stacked produce crates, fabric awnings and a rain-darkened shop threshold
+        for x,y in ((275,88),(286,91),(303,86),(317,92)):
+            d.rectangle((x,y,x+9,y+8),fill=(48,38,48)); d.line((x,y,x+8,y),fill=t["warm"])
+            d.line((x+2,y+2,x+2,y+6),fill=steel)
+    elif chapter == 1:  # foundry stacks, furnace mouth and overhead steam pipe
+        for x,h,w in ((260,38,13),(276,52,17),(1045,44,15),(1064,34,12)):
+            y=102-h
+            d.polygon([(x,y+6),(x+3,y),(x+w-3,y),(x+w,y+6),(x+w-1,103),(x+1,103)],fill=(37,31,36))
+            d.line((x+2,y+4,x+w-2,y+4),fill=rust,width=2)
+            d.rectangle((x+4,y+11,x+w-4,y+17),fill=(117,57,43))
+            for yy in range(y+21,100,7): d.point((x+w//2,yy),fill=(171,83,48))
+            d.line((x+2,100,x+w-2,100),fill=steel)
+        d.line((260,57,260,49,292,49,292,57),fill=ink,width=4)
+        d.line((260,56,260,48,292,48,292,56),fill=rust,width=2)
+        for x,y in ((269,39),(277,32),(285,26),(1051,45),(1058,37)):
+            d.ellipse((x,y,x+8,y+4),fill=(68,58,63))
+            d.line((x+2,y+3,x+9,y+1),fill=(100,86,83))
+        d.rectangle((430,84,482,104),fill=(27,24,30))
+        d.rectangle((437,89,475,103),fill=(106,47,35))
+        d.rectangle((444,92,468,101),fill=(255,112,58))
+        for x in range(447,468,5): d.line((x,93,x,100),fill=(255,190,94))
+    elif chapter == 2:  # dockside crane, ship bow and mooring gear
+        d.polygon([(170,79),(204,73),(238,77),(263,88),(282,100),(164,100)],fill=(18,43,55))
+        d.line((171,80,204,74,239,78,263,89),fill=t["cyan"],width=2)
+        d.rectangle((192,66,245,77),fill=(27,53,62))
+        for x in (199,211,223,235): d.rectangle((x,68,x+7,75),fill=(91,112,112))
+        d.line((205,66,205,55,242,55,254,64),fill=ink,width=4)
+        d.line((205,65,205,54,242,54,254,63),fill=steel,width=2)
+        d.line((242,55,242,78),fill=ink,width=2); d.line((242,56,242,78),fill=t["warm"])
+        d.line((188,55,260,55),fill=ink,width=3); d.line((188,54,260,54),fill=steel)
+        d.line((188,54,174,66),fill=steel,width=2)
+        for x in (180,193,253,266):
+            d.rectangle((x,94,x+7,106),fill=(25,48,58)); d.line((x,95,x+6,95),fill=t["cyan"])
+        # wet dock edge, bollards and rope loops
+        d.line((0,108,420,108),fill=(42,101,111),width=1)
+        for x in (64,151,294,366):
+            d.rectangle((x,99,x+4,109),fill=(65,83,88)); d.ellipse((x-3,97,x+7,101),outline=steel)
+            d.line((x+2,100,x+18,105,x+27,104),fill=(79,112,117))
+    elif chapter == 3:  # dense arcade canopy with deep arch and layered signage
+        d.polygon([(480,63),(492,43),(511,32),(540,32),(558,45),(568,63)],fill=(29,22,54))
+        d.line((480,63,492,43,511,32,540,32,558,45,568,63),fill=t["pink"],width=2)
+        d.arc((496,43,552,94),180,360,fill=t["cyan"],width=3)
+        d.rectangle((501,67,547,103),fill=(14,14,34))
+        for x in range(506,545,7):
+            d.line((x,70,x,100),fill=(57,48,91))
+            if x%2: d.point((x+2,82),fill=t["pink"])
+        for x,y,w,col in ((405,54,47,t["cyan"]),(575,48,59,t["pink"]),(628,68,34,t["warm"])):
+            d.rectangle((x-3,y-3,x+w,y+5),fill=ink)
+            d.line((x,y,x+w-2,y),fill=col,width=2)
+            for q in range(x+3,x+w-3,5): d.point((q,y+3),fill=mix(col,t["moon"],.4))
+        d.line((460,26,460,91),fill=ink,width=3); d.line((461,26,461,91),fill=steel)
+        d.line((460,29,495,29),fill=ink,width=3); d.line((460,28,495,28),fill=t["pink"])
+        for x in (458,493,562): d.point((x,94),fill=t["cyan"])
+    elif chapter == 4:  # greenhouse roof, overgrown walls and mature street trees
+        d.polygon([(250,77),(274,48),(303,34),(335,48),(359,77)],fill=(25,46,47))
+        d.line((250,77,274,48,303,34,335,48,359,77),fill=(91,139,119),width=2)
+        d.line((274,48,274,89,335,89,335,48),fill=(74,118,105),width=2)
+        for x in (285,301,317,330):
+            d.line((x,45,x,88),fill=(72,111,103))
+        d.line((260,69,350,69),fill=(83,132,113))
+        for x,y in ((275,60),(290,53),(311,58),(327,66),(300,74)):
+            d.point((x,y),fill=(133,189,131)); d.point((x+1,y+1),fill=(69,133,95))
+        for x in (92,390,850,1190):
+            d.line((x,102,x+1,72),fill=(45,76,58),width=3)
+            for ox,oy in ((-10,75),(0,65),(9,78),(-4,84),(8,88)):
+                d.ellipse((x+ox-5,oy-4,x+ox+6,oy+5),fill=(30,68,54))
+                d.point((x+ox+2,oy-2),fill=(99,153,100))
+            d.line((x-5,103,x+8,103),fill=(84,105,76),width=2)
+        # broken paving interrupted by weeds
+        for x in range(20,1400,73):
+            d.line((x,112,x+13,112),fill=(44,66,59))
+            if x%3: d.line((x+5,109,x+4,105),fill=(75,130,83))
+    else:  # fortified signal district: relay mast, dish and armored service gantry
+        d.polygon([(640,72),(654,57),(668,72),(668,105),(640,105)],fill=(26,23,43))
+        d.line((640,72,654,57,668,72),fill=t["pink"],width=2)
+        d.rectangle((647,75,661,101),fill=(11,15,31))
+        for y in (80,87,94): d.line((650,y,658,y),fill=t["cyan"],width=1)
+        d.line((654,57,654,9),fill=ink,width=4); d.line((654,57,654,9),fill=steel,width=1)
+        d.line((654,15,638,28,654,25,670,35),fill=ink,width=3)
+        d.line((654,15,638,28,654,25,670,35),fill=t["pink"],width=1)
+        d.ellipse((624,33,647,53),outline=steel,width=2)
+        d.ellipse((628,37,643,49),outline=t["cyan"],width=1)
+        d.line((635,42,654,25),fill=ink,width=2)
+        d.rectangle((1110,65,1172,105),fill=(24,21,39))
+        d.rectangle((1116,71,1166,99),fill=(11,17,32))
+        for y in (75,83,91): d.line((1119,y,1162,y),fill=(51,77,103),width=2)
+        for x in (1122,1133,1144,1155): d.point((x,79),fill=t["pink"])
+        d.line((1098,62,1186,62),fill=ink,width=4); d.line((1098,61,1186,61),fill=t["cyan"],width=1)
+        for x in (1103,1180): d.line((x,62,x,105),fill=steel,width=2)
+    # Small, unique ground-level traces connect landmark to the same continuous street.
+    for x in (38, 512, 932, 1360):
+        d.line((x,107,x+18,107),fill=mix(t["street"],t["moon"],.32))
+        d.point((x+5,106),fill=t["cyan"] if chapter in (0,2,3,5) else t["warm"])
+
+
 def chapter_scene(ch):
     t=THEMES[ch]; rng=random.Random(3200+ch*901)
     im=Image.new("RGB",(W,H),t["sky"]); d=ImageDraw.Draw(im)
@@ -552,6 +663,7 @@ def chapter_scene(ch):
         d.line((x,115,x+7,115),fill=mix(t["street"],t["cyan"],.34),width=1)
     # Composite the continuous frontage last so its sidewalk, doors and curb are not buried by the road pass.
     draw_street_frontage(im,ch,t)
+    draw_district_landmarks(im,ch,t)
     # A few foreground cable/roof fragments frame the panoramic composition.
     for x in (20,430,870,1280):
         d.line((x,3,x+46,8,x+94,5),fill=(4,7,16),width=2)
