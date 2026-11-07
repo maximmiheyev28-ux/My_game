@@ -192,6 +192,37 @@ def draw_katana(d, hand, angle_deg=-24, length=32, swing=False):
         px(d, int((hx+tip[0])/2), int((hy+tip[1])/2)-3, "pink_hi")
 
 
+def draw_hero_material_details(d, cx, cy, hx, hy, frame, state):
+    # Segmented shoulder armor: dark under-plates, bevels and cool rim highlights.
+    poly(d,[(cx-13,cy-8),(cx-8,cy-12),(cx-2,cy-9),(cx-3,cy-3),(cx-10,cy-2)],'deep','outline')
+    ln(d,[(cx-11,cy-7),(cx-8,cy-10),(cx-4,cy-8)],'steel',1)
+    poly(d,[(cx+7,cy-10),(cx+13,cy-8),(cx+14,cy-2),(cx+8,cy+1),(cx+5,cy-4)],'navy','outline')
+    ln(d,[(cx+8,cy-8),(cx+11,cy-6),(cx+12,cy-3)],'cyan',1)
+    # Chest harness, inset plate, fasteners and a small powered indicator.
+    ln(d,[(cx-7,cy-7),(cx-2,cy-2),(cx+5,cy+5)],'outline',3)
+    ln(d,[(cx-7,cy-7),(cx-2,cy-2),(cx+5,cy+5)],'steel',1)
+    poly(d,[(cx-4,cy-6),(cx+4,cy-8),(cx+8,cy-2),(cx+5,cy+5),(cx-3,cy+3)],'blue','outline')
+    ln(d,[(cx-2,cy-5),(cx+3,cy-6),(cx+5,cy-2)],'light',1)
+    px(d,cx+2,cy-1,'cyan_hi'); px(d,cx+3,cy,'cyan')
+    rect(d,(cx-2,cy+8,cx+4,cy+12),'outline','steel')
+    rect(d,(cx-1,cy+9,cx+3,cy+10),'gold')
+    # Coat folds and stitching define separate cloth panels.
+    ln(d,[(cx-9,cy+9),(cx-7,cy+16),(cx-5,cy+20)],'deep',1)
+    ln(d,[(cx+7,cy+8),(cx+6,cy+14),(cx+9,cy+18)],'steel',1)
+    for ox,oy in [(-10,14),(-8,17),(8,13),(10,17)]: px(d,cx+ox,cy+oy,'pink_hi' if ox<0 else 'cyan')
+    # Hair strands and face catchlights remain legible at gameplay scale.
+    ln(d,[(hx-7,hy-15),(hx-2,hy-20),(hx+4,hy-19)],'steel',1)
+    ln(d,[(hx+5,hy-17),(hx+10,hy-12),(hx+11,hy-7)],'blue',1)
+    px(d,hx+5,hy+1,'white'); px(d,hx+6,hy+2,'cyan_hi')
+    # Knee guards and rivets follow the same asymmetric faction colors.
+    for ox,oy,accent in [(-10,31,'pink'),(8,32,'cyan')]:
+        poly(d,[(cx+ox-3,cy+oy-3),(cx+ox+3,cy+oy-4),(cx+ox+4,cy+oy+2),(cx+ox-2,cy+oy+3)],'navy','outline')
+        ln(d,[(cx+ox-2,cy+oy-2),(cx+ox+2,cy+oy-2)],accent,1)
+        px(d,cx+ox+1,cy+oy,'white')
+    # Scarf stitching advances by one pixel through the animation cycle.
+    px(d,24+(frame%3),35+int(math.sin(frame)*1),'pink_hi')
+    px(d,27+(frame%2),38,'white')
+
 def draw_hero(state: str, frame: int, count: int) -> Image.Image:
     im = Image.new("RGBA", SIZE, C["clear"])
     d = ImageDraw.Draw(im)
@@ -306,6 +337,7 @@ def draw_hero(state: str, frame: int, count: int) -> Image.Image:
         blade_angles, blade_lengths = [-25 + math.sin(p)*4]*count, [32]*count
     draw_arm(d, (58+lean, 43+bob), front_elbow, front_wrist, side="front")
     draw_katana(d, front_wrist, blade_angles[frame], blade_lengths[frame], state == "attack")
+    draw_hero_material_details(d, cx, cy, hx, hy, frame, state)
 
     rect(d, (cx-13, cy+5, cx-10, cy+10), "pink")
     rect(d, (cx+8, cy+10, cx+10, cy+14), "cyan")
