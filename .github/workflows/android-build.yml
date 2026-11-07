@@ -199,6 +199,25 @@ jobs:
           python3 -m py_compile pixel_art_visual_overhaul_v22.py
           python3 pixel_art_visual_overhaul_v22.py
 
+      - name: Upload generated pixel-art for visual inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PosledniySignal-generated-pixel-art
+          path: |
+            assets/backgrounds/act_*.png
+            assets/backgrounds/foreground_*.png
+            assets/characters/player_*.png
+            assets/characters/guard_*.png
+            assets/characters/shooter_*.png
+            assets/characters/hunter_*.png
+            assets/characters/aberration_*.png
+            assets/characters/boss_*.png
+            assets/fx/pixel_*.png
+            assets/cinematics/cutscene_atlas.webp
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Enforce strict pixel-art quality gates
         run: |
           set -euo pipefail
