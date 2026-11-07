@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="192" viewBox="0 0 384 192" shape-rendering="crispEdges">
+<!-- enemy 01: corporate riot enforcer -->
+<g transform="translate(8 8)">
+<path d="M42 18l24-7 18 13 5 25-13 19-35-3-14-20 5-20z" fill="#101728"/><path d="M43 24l20-8 15 10-2 24-13 11-19-8-8-16z" fill="#26364c"/><path d="M43 34h31v10H43z" fill="#101521"/><path d="M47 37h8v4h-8zM64 37h8v4h-8z" fill="#ed385e"/><path d="M36 63l-8 20 8 46 42 1 10-44-13-24z" fill="#202b3f"/><path d="M40 70l-10 23 12 8 9-24zM72 69l14 24-11 10-10-23z" fill="#38465d"/><path d="M40 79h36v8H40z" fill="#a22c4b"/><path d="M42 96h29v7H42zM43 113h27v5H43z" fill="#121b2d"/><path d="M34 126l-5 29 17 2 8-30zM64 126l5 30 18 1-8-32z" fill="#111827"/><path d="M27 153h23v9H24zM67 154h24v9H67z" fill="#080d18"/><path d="M32 72l-17 26 4 25 12 1 12-29z" fill="#26364c"/><path d="M77 72l14 23 8 27-11 5-18-28z" fill="#26364c"/><path d="M91 87l29 43-5 4-34-38z" fill="#d2d9e9"/>
+</g>
+<!-- enemy 02: masked ronin -->
+<g transform="translate(136 8)">
+<path d="M42 18l22-9 21 14 2 27-15 21-35-7-11-20 4-20z" fill="#171b2b"/><path d="M42 23l22-8 16 13-4 28-18 10-20-13-3-18z" fill="#8d314a"/><path d="M40 38h39v18H40z" fill="#151927"/><path d="M46 42h9v5h-9zM65 42h9v5h-9z" fill="#ff4b62"/><path d="M34 66l-7 19 9 43 43 1 12-46-15-20z" fill="#25283c"/><path d="M39 74l-15 27 9 12 18-27zM76 72l16 25-11 13-18-25z" fill="#4a3b54"/><path d="M39 86h40v9H39z" fill="#b34c58"/><path d="M42 101h32v7H42z" fill="#151b2c"/><path d="M35 125l-8 29 18 4 10-31zM66 125l8 31 18 1-9-33z" fill="#141a2a"/><path d="M26 153h24v9H24zM73 154h23v9H73z" fill="#080d18"/><path d="M34 74l-18 22 2 29 13 1 14-31zM79 74l16 25 6 25-12 4-18-29z" fill="#25283c"/><path d="M94 91l29 36-5 5-35-33z" fill="#dce4f1"/>
+</g>
+<!-- enemy 03: long-coat executioner -->
+<g transform="translate(264 8)">
+<path d="M35 18l27-10 23 18 1 28-19 20-37-9-10-26 4-18z" fill="#111726"/><path d="M40 22l21-9 18 15-5 26-17 13-20-15-3-17z" fill="#4d5368"/><path d="M38 40h42v13H38z" fill="#111624"/><path d="M45 43h10v4H45zM65 43h9v4h-9z" fill="#6fe2f0"/><path d="M29 65l-12 30 9 57 54 1 11-58-15-30z" fill="#111a2c"/><path d="M35 70l-12 30 12 13 15-29zM76 70l16 31-13 13-17-29z" fill="#2a354d"/><path d="M28 91h59v8H28z" fill="#4b304b"/><path d="M34 108h48v8H34z" fill="#1b263a"/><path d="M31 147l-4 12 21 2 6-12zM67 147l8 12 22 1-6-13z" fill="#080e1a"/><path d="M17 85l-8 31 8 10 13-29zM89 86l14 30 6 12-12 4-17-31z" fill="#111a2c"/><path d="M100 97l23 34-5 5-30-30z" fill="#d7e3f2"/>
+</g>
+</svg>
