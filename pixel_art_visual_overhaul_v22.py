@@ -300,18 +300,28 @@ def draw_street_frontage(im, chapter, t):
       {"materials":[(38,57,56),(53,66,63),(36,47,61),(67,66,57)],"accent":t["cyan"],"kind":"overgrown quarter"},
       {"materials":[(51,37,57),(67,42,57),(38,35,55),(76,49,62)],"accent":t["pink"],"kind":"signal district"}
     ][chapter]
+    # Each district has its own street grain: narrow retail lots, industrial sheds, dock warehouses,
+    # vertical arcade blocks, low garden houses, or fortified signal infrastructure.
+    profiles=[
+        {"width":(58,112),"top":(43,65),"roof":(0,1,2,3,4),"sign":.96},
+        {"width":(132,218),"top":(22,43),"roof":(0,0,1,3,4),"sign":.38},
+        {"width":(104,184),"top":(38,59),"roof":(0,1,2,4,4),"sign":.48},
+        {"width":(66,126),"top":(17,43),"roof":(0,1,1,2,3,4),"sign":.94},
+        {"width":(116,204),"top":(48,70),"roof":(0,2,2,3,4),"sign":.42},
+        {"width":(88,158),"top":(26,51),"roof":(0,1,2,3,4),"sign":.72}
+    ][chapter]
     # A continuous row of attached buildings; widths and rooflines vary, no repeated modular pattern.
     x=-18
     building=0
     while x<W+20:
-        bw=rng.randint(82,166)
-        top=rng.randint(38,59)
+        bw=rng.randint(*profiles["width"])
+        top=rng.randint(*profiles["top"])
         base=104+rng.randint(-2,2)
         wall=rng.choice(districts["materials"])
         shadow=mix(wall,t["sky"],.48)
         edge=mix(wall,t["moon"],.24)
         # Individual roof silhouette: parapet, sloped cap, setback, or rooftop room.
-        roof=rng.randrange(5)
+        roof=rng.choice(profiles['roof'])
         if roof==0:
             d.rectangle((x,top+4,x+bw,base),fill=wall)
             d.line((x,top+4,x+bw,top+4),fill=edge,width=2)
@@ -392,7 +402,7 @@ def draw_street_frontage(im, chapter, t):
             d.rectangle((door_x+2,85,door_x+9,91),fill=mix(t["cyan"],wall,.65))
             d.point((door_x+9,98),fill=t["warm"])
         # Signs are unique per building in size, placement and neon hue.
-        if rng.random()<.92:
+        if rng.random()<profiles['sign']:
             sy=rng.randint(68,75); sx=x+rng.randint(8,max(9,bw-36))
             sw=rng.randint(18,min(43,max(19,bw-12)))
             sign=rng.choice((t["pink"],t["cyan"],t["warm"]))
@@ -513,6 +523,22 @@ def chapter_scene(ch):
         x=(i*61+ch*37)%W; y=10+(i*19)%43
         d.line((x,y,x+8+(i%9)*3,y),fill=mix(t["sky"],t["haze"],.45),width=1)
         if i%5==0: d.point((x+3,y+2),fill=t["cyan"])
+    # District-specific neon haze: stepped light pools behind the roofline, quantised to pixel bands.
+    glow_sources={
+        0:[(180,t["pink"]),(760,t["warm"]),(1210,t["cyan"])],
+        1:[(330,t["warm"]),(1030,t["pink"])],
+        2:[(220,t["cyan"]),(930,t["warm"])],
+        3:[(140,t["pink"]),(520,t["cyan"]),(1110,t["pink"])],
+        4:[(390,t["cyan"]),(1050,t["warm"])],
+        5:[(260,t["pink"]),(700,t["cyan"]),(1190,t["warm"])]
+    }[ch]
+    for sx, hue in glow_sources:
+        for band in range(11):
+            y=34+band*3
+            spread=24+band*13
+            strength=max(.04,.24-band*.014)
+            d.line((max(0,sx-spread),y,min(W-1,sx+spread),y),
+                   fill=mix(t["haze"],hue,strength),width=1)
     draw_skyline(im,ch,t)
     # Ground plane: layered curb, rail glints and reflection streaks with irregular breaks.
     d=ImageDraw.Draw(im)
