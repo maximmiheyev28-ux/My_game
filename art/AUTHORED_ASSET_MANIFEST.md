@@ -22,8 +22,8 @@ Local checks completed: atlas dimensions and alpha channel inspected, extracted 
 - Source: `assets/authored/enemies/enemy_frames.webp`
 - Canvas: 1152 × 112 px, 12 cells of 96 × 112 px.
 - Four distinct archetypes: riot enforcer (`guard`), masked marksman (`shooter`), pale ronin (`hunter`), and bio-mechanical aberration (`aberration`).
-- Each archetype has separate idle, locomotion and attack poses. CI slices the fixed frames into the filenames already loaded by `scripts/enemies/enemy.gd`.
+- Each archetype has separate idle, locomotion and attack poses. CI slices the fixed frames into the filenames already loaded by `scripts/enemies/enemy.gd`. The player is scaled to 0.55 and enemies to 0.5 so the 112 px artwork aligns with the existing collision feet; stasis scaling preserves that baseline.
 
 ## Remaining scope
 
-This is an initial protagonist pass, not completion of the game's art or final acceptance. Enemy archetypes, bosses, environments, props, combat effects, UI artwork and animated cinematics still require their own authored pixel-art work and in-game visual review.
+This is an initial protagonist pass, not completion of the game's art or final acceptance. Bosses, environments, props, combat effects, UI artwork and animated cinematics still require their own authored pixel-art work and in-game visual review.

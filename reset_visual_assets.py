@@ -86,7 +86,17 @@ if player_script.is_file():
     source = player_script.read_text(encoding="utf-8")
     source = re.sub(r"const TEX_IDLE := \[.*?\]", "const TEX_IDLE := [preload(\"res://assets/characters/player_idle_0.png\")]", source, count=1, flags=re.S)
     source = re.sub(r"const TEX_RUN := \[.*?\]", "const TEX_RUN := [preload(\"res://assets/characters/player_run_0.png\"), preload(\"res://assets/characters/player_run_1.png\")]", source, count=1, flags=re.S)
+    source = source.replace("func _ready() -> void:\n    add_to_group(\"player\")", "func _ready() -> void:\n    visual.scale = Vector2(0.55, 0.55)\n    add_to_group(\"player\")", 1)
     player_script.write_text(source, encoding="utf-8")
 
-print(f"ART RESET VERIFIED: {len(paths)} legacy raster files replaced; authored atlas preserved.")
-print("AUTHORED ART INSTALLED: 13 fixed protagonist frames.")
+# Align the new 112 px enemy art to the existing 42 px collision body and floor.
+enemy_script = ROOT / "scripts" / "enemies" / "enemy.gd"
+if enemy_script.is_file():
+    source = enemy_script.read_text(encoding="utf-8")
+    source = source.replace("player = get_tree().get_first_node_in_group(\"player\") as CharacterBody2D\n    var path", "player = get_tree().get_first_node_in_group(\"player\") as CharacterBody2D\n    visual.scale = Vector2(0.5, 0.5)\n    var path", 1)
+    source = source.replace("visual.scale = Vector2(1.08, 1.08)", "visual.scale = Vector2(0.54, 0.54)")
+    source = source.replace("visual.scale = Vector2.ONE", "visual.scale = Vector2(0.5, 0.5)")
+    enemy_script.write_text(source, encoding="utf-8")
+
+print(f"ART RESET VERIFIED: {len(paths)} legacy raster files replaced; authored atlases preserved.")
+print("AUTHORED ART INSTALLED: 13 protagonist frames and 12 enemy frames.")
