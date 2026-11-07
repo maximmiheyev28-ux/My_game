@@ -227,9 +227,19 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --editor --quit
-          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-debug "Android APK (ARM64)" build/PosledniySignal-debug.apk
+          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --editor --quit 2>&1 | tee godot-import.log
+          if grep -E "SCRIPT ERROR:|Parse Error|ERROR:" godot-import.log; then
+            echo "::error::Godot import or script parsing emitted errors"
+            exit 1
+          fi
+          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-debug "Android APK (ARM64)" build/PosledniySignal-debug.apk 2>&1 | tee godot-export.log
+          if grep -E "SCRIPT ERROR:|Parse Error|ERROR:" godot-export.log; then
+            echo "::error::Godot export emitted errors"
+            exit 1
+          fi
           test -s build/PosledniySignal-debug.apk
+          unzip -t build/PosledniySignal-debug.apk
+          unzip -l build/PosledniySignal-debug.apk | grep -q "lib/arm64-v8a/"
           "$ANDROID_HOME/build-tools/36.1.0/apksigner" verify --verbose build/PosledniySignal-debug.apk
           file build/PosledniySignal-debug.apk
       - name: Upload APK artifact
