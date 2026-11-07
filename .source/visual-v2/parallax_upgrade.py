@@ -101,7 +101,7 @@ if 'foreground_%d.png' not in s:
     # Independent near-camera art plane moves slower than the world camera.
     var foreground_layer := Node2D.new()
     foreground_layer.set_script(PARALLAX_SCRIPT)
-    foreground_layer.call("setup", camera, 0.58)
+    foreground_layer.call("setup", camera, 0.0)
     var foreground_sprite := Sprite2D.new()
     foreground_sprite.texture = load("res://assets/backgrounds/foreground_%d.png" % chapter)
     foreground_sprite.centered = false

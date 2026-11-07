@@ -1318,7 +1318,45 @@ def write_backgrounds():
     signatures=set()
     for ch in range(6):
         im=chapter_scene(ch)
-        im.resize((W*S,H*S),Image.Resampling.NEAREST).save(BG/f"act_{ch}.png",optimize=True)
+        final=im.resize((W*S,H*S),Image.Resampling.NEAREST).convert('RGBA')
+        d=ImageDraw.Draw(final,'RGBA')
+        rng=random.Random(48100+ch*733); t=THEMES[ch]
+        # Grounded wall pilasters and drainpipes run continuously to the pavement.
+        for x in range(70,4140,157):
+            top=rng.randint(135,180); bottom=rng.randint(252,278); w=rng.choice((5,7,9,12))
+            d.rectangle((x,top,x+w,bottom),fill=(3,6,15,90))
+            d.line((x+w+1,top+3,x+w+1,bottom-2),fill=(*t['moon'],75),width=2)
+            if rng.random()<.55:
+                px=x+rng.randint(14,38)
+                d.line((px,top-5,px,bottom+28),fill=(5,8,17,235),width=4)
+                d.line((px+1,top-5,px+1,bottom+28),fill=(*t['moon'],90),width=1)
+                for yy in range(top+25,bottom,34): d.line((px-5,yy,px+5,yy),fill=(*t['warm'],115),width=2)
+        # Recessed windows, reflected panes and occasional lit interiors.
+        for _ in range(190):
+            x=rng.randrange(18,4180); y=rng.randrange(145,258); ww=rng.choice((7,9,12,16)); hh=rng.choice((9,12,15))
+            d.rectangle((x-2,y-2,x+ww+2,y+hh+2),fill=(3,6,15,185))
+            glass=t['cyan'] if rng.random()<.56 else t['warm']; alpha=rng.randint(75,155) if rng.random()<.27 else rng.randint(18,60)
+            d.rectangle((x,y,x+ww,y+hh),fill=(*glass,alpha))
+            d.line((x+1,y+1,x+ww-1,y+1),fill=(220,238,246,min(150,alpha+35)),width=1)
+        # Wall-mounted awnings have brackets and hanging supports.
+        for x in range(110,4100,317):
+            y=rng.randint(208,246); width=rng.randint(38,76); accent=t['pink'] if rng.random()<.5 else t['cyan']
+            d.rectangle((x,y,x+width,y+5),fill=(5,8,18,230),outline=(*accent,190),width=1)
+            for k in range(0,width,8): d.line((x+k,y+6,x+k+3,y+13),fill=(*accent,125),width=2)
+            d.line((x+5,y+14,x+5,y+24),fill=(5,8,18,220),width=2)
+            d.line((x+width-5,y+14,x+width-5,y+24),fill=(5,8,18,220),width=2)
+        # Street fixtures rise from the pavement and cast connected shadows.
+        for x in range(100,4200,389):
+            base=352; h=rng.randint(22,42)
+            d.ellipse((x-20,base-5,x+28,base+2),fill=(0,0,0,110))
+            d.rectangle((x-3,base-h,x+3,base),fill=(7,10,19,235))
+            d.rectangle((x-7,base-h-4,x+7,base-h+3),fill=(6,9,18,245),outline=(*t['cyan'],150),width=1)
+        # Converging pavement seams and reflections stay on the road surface.
+        for x in range(0,4200,210): d.line((x,359,x+int((2100-x)*.035),281),fill=(90,115,145,28),width=1)
+        for _ in range(150):
+            x=rng.randrange(4200); y=rng.randrange(286,356); length=rng.randint(5,52); hue=t['cyan'] if rng.random()<.62 else t['pink']
+            d.line((x,y,min(4199,x+length),y+rng.choice((-1,0,1))),fill=(*hue,rng.randint(20,75)),width=rng.choice((1,2,3)))
+        final.convert('RGB').save(BG/f'act_{ch}.png',optimize=True)
         save_foreground(ch)
         signatures.add(im.resize((140,12),Image.Resampling.NEAREST).tobytes())
     assert len(signatures)==6,"Chapter scenes must be visually distinct"
