@@ -874,6 +874,110 @@ def draw_art_direction_pass(im, chapter, t):
         d.line((x,y,x+13,y),fill=mix(t["street"],c,.42),width=1)
         d.point((x+3,y-1),fill=mix(t["street"],c,.58))
 
+
+def draw_facade_sculpture_pass(im, chapter, t):
+    """Break up procedural facade rhythm with three district-specific architectural anchors."""
+    d=ImageDraw.Draw(im)
+    rng=random.Random(55190+chapter*211)
+    ink=mix(t["sky"],t["street"],.30)
+    steel=mix(t["mid"],t["moon"],.42)
+    warm=mix(t["warm"],t["haze"],.20)
+    cyan=mix(t["cyan"],t["mid"],.18)
+    # Keep the signature structures in clear gaps between each chapter's main landmark.
+    anchors=[
+        (105,760,1190),(115,865,1190),(75,1080,1280),
+        (115,340,1110),(125,390,1280),(120,960,1205)
+    ][chapter]
+    for idx,x in enumerate(anchors):
+        w=(82,104,92)[idx]
+        top=(rng.randint(30,47),rng.randint(24,42),rng.randint(35,52))[idx]
+        base=103
+        wall=mix(t["far"] if idx==0 else t["mid"],t["haze"],.20+rng.random()*.12)
+        shade=mix(wall,ink,.55)
+        edge=mix(wall,t["moon"],.32)
+        # A stepped, offset crown gives each anchor a distinct skyline silhouette.
+        d.polygon([(x,top+9),(x+9,top+9),(x+9,top+2),(x+28,top+2),
+                   (x+28,top-5),(x+w-18,top-5),(x+w-18,top+4),
+                   (x+w-5,top+4),(x+w,top+12),(x+w,base),(x,base)],fill=wall)
+        d.line((x+9,top+2,x+28,top+2,x+28,top-5,x+w-18,top-5,
+                x+w-18,top+4,x+w-5,top+4),fill=edge,width=2)
+        # Deep vertical bays and uneven window groups, deliberately not a regular grid.
+        for bx,by,bw,bh in ((x+13,top+18,13,19),(x+37,top+11,17,27),
+                             (x+64,top+23,11,16)):
+            d.rectangle((bx-2,by-2,bx+bw+2,by+bh+2),fill=shade)
+            d.rectangle((bx,by,bx+bw,by+bh),fill=mix(wall,ink,.28))
+            d.line((bx+2,by+2,bx+bw-2,by+2),fill=cyan)
+            d.line((bx+2,by+bh-2,bx+bw-2,by+bh-2),fill=mix(edge,wall,.35))
+            d.line((bx+bw//2,by+3,bx+bw//2,by+bh-3),fill=shade)
+            if (idx+chapter)%2==0:
+                d.rectangle((bx+3,by+5,bx+bw//2-1,by+bh//2),fill=mix(t["warm"],wall,.28))
+        if chapter==0:
+            # Market building: projecting timber balconies, hanging sign and folded awning.
+            for yy in (top+33,top+53):
+                d.line((x+5,yy,x+w-5,yy),fill=shade,width=3)
+                d.line((x+8,yy+2,x+8,yy+8),fill=edge)
+                d.line((x+w-9,yy+2,x+w-9,yy+8),fill=edge)
+            d.polygon([(x+20,top+42),(x+59,top+42),(x+65,top+48),(x+15,top+48)],fill=t["pink"])
+            d.line((x+24,top+44,x+59,top+44),fill=warm,width=1)
+            d.line((x+75,top+10,x+75,top+28),fill=ink,width=2)
+            d.rectangle((x+68,top+27,x+83,top+38),fill=shade)
+            d.line((x+70,top+29,x+81,top+29),fill=t["warm"],width=2)
+        elif chapter==1:
+            # Foundry block: huge segmented exhaust, pressure pipes and riveted braces.
+            d.rectangle((x+48,top-12,x+69,top+8),fill=shade)
+            d.rectangle((x+52,top-16,x+65,top-12),fill=edge)
+            for yy in range(top+18,base-7,8):
+                d.line((x+4,yy,x+w-5,yy),fill=mix(wall,t["moon"],.13))
+                d.point((x+7,yy+1),fill=warm); d.point((x+w-8,yy+1),fill=warm)
+            d.line((x+24,top+9,x+24,base-5),fill=edge,width=2)
+            d.line((x+29,top+9,x+29,base-5),fill=shade)
+            d.line((x+35,top+19,x+43,top+27,x+35,top+35),fill=warm,width=2)
+        elif chapter==2:
+            # Harbor shed: sawtooth roof, loading gantry and corrugated sliding doors.
+            d.polygon([(x+4,top+8),(x+25,top-5),(x+48,top+8),(x+70,top-5),(x+w,top+8)],fill=shade)
+            d.line((x+4,top+8,x+25,top-5,x+48,top+8,x+70,top-5,x+w,top+8),fill=edge,width=2)
+            d.rectangle((x+18,top+48,x+61,base),fill=shade)
+            for xx in range(x+22,x+60,6):
+                d.line((xx,top+51,xx,base-3),fill=mix(t["cyan"],wall,.48))
+            d.line((x+12,top+37,x+w-8,top+37),fill=t["cyan"],width=2)
+            d.line((x+14,top+34,x+14,top+43),fill=edge)
+            d.line((x+w-12,top+34,x+w-12,top+43),fill=edge)
+        elif chapter==3:
+            # Arcade tower: vertical neon fins, layered marquee and a recessed glass spine.
+            for xx in (x+12,x+29,x+74):
+                d.rectangle((xx,top+7,xx+4,base-4),fill=shade)
+                d.line((xx+2,top+10,xx+2,base-8),fill=t["pink"] if xx%2 else t["cyan"],width=2)
+            d.rectangle((x+34,top+38,x+68,base-4),fill=shade)
+            d.rectangle((x+37,top+41,x+65,base-7),fill=mix(t["cyan"],wall,.55))
+            for yy in range(top+44,base-8,8):
+                d.line((x+39,yy,x+63,yy),fill=mix(t["moon"],t["cyan"],.25))
+            d.polygon([(x+5,top+30),(x+80,top+30),(x+73,top+36),(x+10,top+36)],fill=t["pink"])
+        elif chapter==4:
+            # Garden house: broken gable, timber braces, ivy and illuminated planters.
+            d.polygon([(x+4,top+15),(x+25,top-8),(x+51,top+4),(x+78,top-4),(x+w,top+17)],fill=shade)
+            d.line((x+4,top+15,x+25,top-8,x+51,top+4,x+78,top-4,x+w,top+17),fill=edge,width=2)
+            for xx in (x+11,x+w-13):
+                d.line((xx,top+29,xx-3,base-5),fill=(42,96,67),width=2)
+                for yy in range(top+37,base-8,12):
+                    d.ellipse((xx-5,yy-3,xx+2,yy+3),fill=(49,112,72))
+            d.rectangle((x+32,base-12,x+61,base-6),fill=(34,82,55))
+            for xx in range(x+35,x+60,7): d.point((xx,base-10),fill=t["cyan"])
+        else:
+            # Signal bastion: armored buttresses, observation slits and exposed cable runs.
+            for xx in (x+8,x+31,x+w-15):
+                d.polygon([(xx,top+16),(xx+8,top+10),(xx+13,base),(xx+4,base)],fill=shade)
+                d.line((xx+7,top+15,xx+10,base-3),fill=edge)
+            for yy in (top+30,top+51,top+72):
+                d.line((x+16,yy,x+w-18,yy),fill=shade,width=3)
+            d.rectangle((x+48,top+24,x+59,top+39),fill=ink)
+            d.line((x+53,top+27,x+53,top+36),fill=t["cyan"],width=2)
+            d.line((x+w-7,top+4,x+w-7,base-3),fill=t["pink"],width=2)
+        # Grounded contact shadow, bolts and a few chipped masonry highlights.
+        d.line((x+3,base-1,x+w-2,base-1),fill=ink,width=2)
+        for j in range(7):
+            bx=x+8+(j*13+idx*5)%(w-16); by=top+14+(j*11)%(base-top-20)
+            d.point((bx,by),fill=edge if j%2 else shade)
+
 def chapter_scene(ch):
     t=THEMES[ch]; rng=random.Random(3200+ch*901)
     im=Image.new("RGB",(W,H),t["sky"]); d=ImageDraw.Draw(im)
@@ -915,6 +1019,7 @@ def chapter_scene(ch):
         d.line((x,115,x+7,115),fill=mix(t["street"],t["cyan"],.34),width=1)
     # Composite the continuous frontage last so its sidewalk, doors and curb are not buried by the road pass.
     draw_street_frontage(im,ch,t)
+    draw_facade_sculpture_pass(im,ch,t)
     draw_district_landmarks(im,ch,t)
     draw_art_direction_pass(im,ch,t)
     # A few foreground cable/roof fragments frame the panoramic composition.
