@@ -199,6 +199,12 @@ jobs:
           python3 -m py_compile pixel_art_visual_overhaul_v22.py
           python3 pixel_art_visual_overhaul_v22.py
 
+      - name: Enforce strict pixel-art quality gates
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/validate_pixel_art_quality.py
+          python3 tools/validate_pixel_art_quality.py
+
 
       - name: Package restored project for visual overhaul
         run: |
