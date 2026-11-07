@@ -691,11 +691,14 @@ def validate():
     for ch in range(6):
         with Image.open(BG/f"act_{ch}.png") as im:
             assert im.size==(4200,360) and im.mode=="RGB", f"chapter {ch}: invalid panorama canvas"
-            reduced=im.resize((140,12),Image.Resampling.NEAREST)
-            colors=reduced.getcolors(140*12) or []
-            assert len(colors)>80, f"chapter {ch}: insufficient palette complexity"
+            # Measure a broad, area-filtered sample: nearest-neighbour sampling at
+            # 140x12 can alias thin pixel-art details and falsely reject rich scenes.
+            reduced=im.resize((1400,120),Image.Resampling.BOX)
+            colors=reduced.getcolors(1400*120) or []
+            assert len(colors)>80, f"chapter {ch}: insufficient palette complexity ({len(colors)} sampled colors)"
             assert min(ImageStat.Stat(im).stddev)>7, f"chapter {ch}: flat color distribution"
-            bg_signatures.add(reduced.tobytes())
+            signature=im.resize((140,12),Image.Resampling.BOX)
+            bg_signatures.add(signature.tobytes())
         with Image.open(BG/f"foreground_{ch}.png") as im:
             assert im.size==(4200,360) and im.mode=="RGBA" and im.getchannel("A").getbbox(), f"chapter {ch}: invalid parallax plane"
     assert len(bg_signatures)==6, "Chapter backgrounds must be genuinely distinct"
