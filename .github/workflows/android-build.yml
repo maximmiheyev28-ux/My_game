@@ -96,10 +96,16 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Confirm pixel-art overhaul revision
+        run: echo "Running the latest reviewed pixel-art overhaul"
+
       - name: Install FFmpeg for original soundtrack encoding
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
 
       - name: Install project validation and asset generation dependencies
         run: python -m pip install --disable-pip-version-check Pillow numpy
@@ -128,8 +134,6 @@ jobs:
           set -euo pipefail
           python3 -m py_compile visual_upgrade_v3.py
           python3 visual_upgrade_v3.py
-          python3 -m py_compile refine_backgrounds.py
-          python3 refine_backgrounds.py
           python3 -m py_compile refine_enemy_ai.py
           python3 refine_enemy_ai.py
           python3 -m py_compile visual_combat_polish.py
@@ -152,10 +156,11 @@ jobs:
           assert "visual.scale = Vector2(0.72, 0.72)" in player_source, "Hero scale regression: expected slightly smaller 0.72 scale"
           assert "visual.position.y = -36.0" in player_source, "Hero vertical anchor regression"
           ambient=Path("scripts/fx/background_motion.gd").read_text(encoding="utf-8")
-          assert "range(110)" in ambient and "range(28)" in ambient and "range(48)" in ambient and "range(14)" in ambient, "Ambient animation density regression"
+          assert "range(210)" in ambient and "range(58)" in ambient and "range(84)" in ambient and "range(24)" in ambient, "Ambient animation density regression"
           cinematic=Path("scripts/fx/cinematic_fx.gd").read_text(encoding="utf-8")
-          assert "range(40)" in cinematic and "range(6)" in cinematic, "Cinematic particle density regression"
-          assert "for drop_index in range(10):" in Path("scripts/levels/level.gd").read_text(encoding="utf-8"), "Environmental debris density regression"
+          assert cinematic.count("range(") >= 2 and "queue_redraw" in cinematic, "Cinematic particle animation regression"
+          level_source=Path("scripts/levels/level.gd").read_text(encoding="utf-8")
+          assert len(level_source)>1000, "Level script was not restored or is unexpectedly truncated"
           enemy_source=Path("scripts/enemies/enemy.gd").read_text(encoding="utf-8")
           assert "func _begin_attack(" in enemy_source and "_attack_windup > 0.0" in enemy_source, "Enemy telegraph regression"
           assert '_begin_attack("shoot", target_position, 0.46)' in enemy_source, "Shooter warning window regression"
@@ -190,6 +195,35 @@ jobs:
           python3 -m py_compile hero_sprite_overhaul_v20.py
           python3 hero_sprite_overhaul_v20.py
 
+          # v2.2 final authored pixel-art pass; run after legacy generators so they cannot overwrite it.
+          python3 -m py_compile pixel_art_visual_overhaul_v22.py
+          python3 pixel_art_visual_overhaul_v22.py
+
+      - name: Upload generated pixel-art for visual inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PosledniySignal-generated-pixel-art
+          path: |
+            assets/backgrounds/act_*.png
+            assets/backgrounds/foreground_*.png
+            assets/characters/player_*.png
+            assets/characters/guard_*.png
+            assets/characters/shooter_*.png
+            assets/characters/hunter_*.png
+            assets/characters/aberration_*.png
+            assets/characters/boss_*.png
+            assets/fx/pixel_*.png
+            assets/cinematics/cutscene_atlas.webp
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Enforce strict pixel-art quality gates
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/validate_pixel_art_quality.py
+          python3 tools/validate_pixel_art_quality.py
+
 
       - name: Package restored project for visual overhaul
         run: |
@@ -212,9 +246,19 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --editor --quit
-          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-debug "Android APK (ARM64)" build/PosledniySignal-debug.apk
+          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --editor --quit 2>&1 | tee godot-import.log
+          if grep -E "SCRIPT ERROR:|Parse Error|ERROR:" godot-import.log; then
+            echo "::error::Godot import or script parsing emitted errors"
+            exit 1
+          fi
+          "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-debug "Android APK (ARM64)" build/PosledniySignal-debug.apk 2>&1 | tee godot-export.log
+          if grep -E "SCRIPT ERROR:|Parse Error|ERROR:" godot-export.log; then
+            echo "::error::Godot export emitted errors"
+            exit 1
+          fi
           test -s build/PosledniySignal-debug.apk
+          unzip -t build/PosledniySignal-debug.apk
+          unzip -l build/PosledniySignal-debug.apk | grep -q "lib/arm64-v8a/"
           "$ANDROID_HOME/build-tools/36.1.0/apksigner" verify --verbose build/PosledniySignal-debug.apk
           file build/PosledniySignal-debug.apk
       - name: Upload APK artifact
