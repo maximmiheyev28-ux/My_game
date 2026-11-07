@@ -695,6 +695,7 @@ def draw_art_direction_pass(im, chapter, t):
     d=ImageDraw.Draw(im)
     ink=(4,7,16); black=(7,10,19); wet=(9,16,27)
     steel=mix(t["mid"],t["moon"],.34); cold=mix(t["cyan"],t["moon"],.28)
+    rust=mix(t["warm"],(139,67,48),.48)
     warm=mix(t["warm"],(255,225,174),.22); accent=t["pink"]
     # Every act receives a unique, large-scale silhouette with a readable light hierarchy.
     if chapter==0:
