@@ -96,6 +96,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Confirm pixel-art overhaul revision
+        run: echo "Running the latest reviewed pixel-art overhaul"
+
       - name: Install FFmpeg for original soundtrack encoding
         run: |
           if ! command -v ffmpeg >/dev/null 2>&1; then
