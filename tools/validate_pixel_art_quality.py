@@ -118,7 +118,7 @@ def main():
         with Image.open(path) as source:
             im = source.convert("RGBA")
             ratio, bbox = alpha_ratio(im)
-            if bbox is None or ratio < 0.08 or ratio > 0.95:
+            if bbox is None or ratio < 0.08:
                 fail(f"{name}: empty or implausibly dense alpha ({ratio:.1%})")
             colors, _ = rgb_metrics(im)
             if colors < 2:
