@@ -29,7 +29,7 @@ def alpha_ratio(image):
     bbox = alpha.getbbox()
     return occupied / total, bbox
 
-def distinct_frame_metrics(paths, label, expected_size):
+def distinct_frame_metrics(paths, label, expected_size, loop=True):
     frames = []
     for path in paths:
         if not path.is_file():
@@ -46,7 +46,8 @@ def distinct_frame_metrics(paths, label, expected_size):
     if len(signatures) != len(frames):
         fail(f"{label}: duplicate frames ({len(signatures)}/{len(frames)} unique)")
     changes = []
-    for index in range(len(frames)):
+    transition_count = len(frames) if loop else len(frames) - 1
+    for index in range(transition_count):
         a, b = frames[index], frames[(index + 1) % len(frames)]
         diff = ImageChops.difference(a, b).convert("RGBA")
         changed = sum(1 for px in diff.getdata() if px[3] or px[0] or px[1] or px[2])
@@ -106,7 +107,7 @@ def main():
     }
     for action, count in hero_sequences.items():
         paths = [CH / f"player_{action}_{i}.png" for i in range(count)]
-        distinct_frame_metrics(paths, f"hero/{action}", (96, 112))
+        distinct_frame_metrics(paths, f"hero/{action}", (96, 112), loop=(action != "death"))
 
     # Weather/FX assets must be real transparent pixel sprites, not empty placeholders.
     fx_names = ["pixel_rain", "pixel_steam", "pixel_window", "pixel_reflection"]
