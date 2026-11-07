@@ -13,7 +13,8 @@ if not assets.is_dir():
     raise SystemExit("assets directory was not restored")
 
 extensions = {".png", ".webp", ".bmp"}
-paths = sorted(p for p in assets.rglob("*") if p.is_file() and p.suffix.lower() in extensions)
+authored_root = assets / "authored"
+paths = sorted(p for p in assets.rglob("*") if p.is_file() and p.suffix.lower() in extensions and authored_root not in p.parents)
 if not paths:
     raise SystemExit("No raster assets found; refusing to report a false reset")
 
@@ -40,5 +41,10 @@ if validator.is_file():
         source = source[:left] + "# Legacy hero-frame checks are disabled while artwork is intentionally blank.\n" + source[right:]
         validator.write_text(source, encoding="utf-8")
 
-print(f"ART RESET VERIFIED: {len(paths)} legacy raster files replaced by transparent 1x1 placeholders.")
-print("Original source art remains recoverable from Git history and .source archive.")
+legacy_generators = ["enhance_project.py", "refine_backgrounds.py", "cinematic_pixel_fx.py", "environmental_weather_v19.py", "hero_sprite_overhaul_v20.py", "pixel_art_lighting_v16.py", "pixel_art_visual_overhaul_v22.py", "visual_combat_polish.py", "visual_upgrade_v3.py", "visual_upgrade_v4.py", "refine_enemy_ai.py"]
+for name in legacy_generators:
+    candidate = ROOT / name
+    if candidate.is_file():
+        candidate.unlink()
+print(f"ART RESET VERIFIED: {len(paths)} legacy raster files replaced; authored assets preserved.")
+print(f"AUTHORED ART PRESERVED: {sum(1 for p in authored_root.rglob(chr(42)) if p.is_file())} files.")
