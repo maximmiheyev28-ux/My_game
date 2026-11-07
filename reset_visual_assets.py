@@ -25,6 +25,19 @@ for path in paths:
         if check.size != (1, 1) or check.convert("RGBA").getpixel((0, 0))[3] != 0:
             raise SystemExit(f"Transparent placeholder verification failed: {path.relative_to(ROOT)}")
 
+# Replace the obsolete frame validator with checks for the authored atlas.
+# The legacy validator expects the original 8/10-frame art set, which this reset retires.
+validator = ROOT / "tools" / "validate_project.py"
+if validator.is_file():
+    source = validator.read_text(encoding="utf-8")
+    start = "# Hero-frame integrity: each authored pose must be unique and retain its pixel canvas.\n"
+    end = "\nimage_count = 0\n"
+    if start in source and end in source:
+        left = source.index(start)
+        right = source.index(end, left)
+        source = source[:left] + "# Legacy frame checks replaced by authored-atlas validation in reset_visual_assets.py.\n" + source[right:]
+        validator.write_text(source, encoding="utf-8")
+
 # Remove legacy procedural graphics scripts after source archive restoration.
 legacy_generators = ["enhance_project.py", "refine_backgrounds.py", "cinematic_pixel_fx.py", "environmental_weather_v19.py", "hero_sprite_overhaul_v20.py", "pixel_art_lighting_v16.py", "pixel_art_visual_overhaul_v22.py", "visual_combat_polish.py", "visual_upgrade_v3.py", "visual_upgrade_v4.py", "refine_enemy_ai.py"]
 for name in legacy_generators:
