@@ -401,6 +401,71 @@ def draw_street_frontage(im, chapter, t):
             d.rectangle((door_x,82,door_x+12,base),fill=shadow)
             d.rectangle((door_x+2,85,door_x+9,91),fill=mix(t["cyan"],wall,.65))
             d.point((door_x+9,98),fill=t["warm"])
+        # District-specific facade grammar: the street must change its construction,
+        # not merely its palette. These overlays alter the building's actual use and silhouette.
+        if chapter == 0:
+            # Dense market frontage: striped canvas awnings, hanging lamps and narrow shop bays.
+            awn_y=76+rng.randint(-2,2)
+            awn_w=min(bw-12,rng.randint(24,42))
+            awn_x=x+rng.randint(5,max(6,bw-awn_w-4))
+            d.rectangle((awn_x,awn_y,awn_x+awn_w,awn_y+2),fill=shadow)
+            for ax in range(awn_x,awn_x+awn_w,5):
+                d.polygon([(ax,awn_y),(min(awn_x+awn_w,ax+4),awn_y),(min(awn_x+awn_w,ax+3),awn_y+5),(ax+1,awn_y+5)],fill=districts["accent"] if (ax//5)%2 else mix(districts["accent"],t["moon"],.30))
+            d.line((awn_x+2,awn_y+6,awn_x+awn_w-2,awn_y+6),fill=edge)
+            d.point((awn_x+awn_w+2,awn_y-3),fill=t["warm"])
+        elif chapter == 1:
+            # Foundry frontage: heavy riveted lintels, broad corrugated steel doors and heat vents.
+            bay_x=x+rng.randint(8,max(9,bw-38)); bay_w=min(bw-12,rng.randint(27,42))
+            d.rectangle((bay_x,77,bay_x+bay_w,base),fill=shadow)
+            d.line((bay_x,77,bay_x+bay_w,77),fill=steel,width=2)
+            for gy in range(81,base-2,5):
+                d.line((bay_x+2,gy,bay_x+bay_w-2,gy),fill=mix(wall,t["moon"],.13))
+            for rx in (bay_x+3,bay_x+bay_w-3):
+                d.point((rx,80),fill=t["warm"]); d.point((rx,base-4),fill=rust)
+            if rng.random()<.7:
+                px=x+bw-rng.randint(8,14)
+                d.rectangle((px,top+7,px+5,base-5),fill=shadow)
+                for py in range(top+12,base-7,9): d.line((px-2,py,px+7,py),fill=rust)
+        elif chapter == 2:
+            # Harbor warehouses: tall loading portals, hoist rails and cargo identification panels.
+            bay_x=x+rng.randint(7,max(8,bw-34)); bay_w=min(bw-10,rng.randint(25,39))
+            d.rectangle((bay_x,74,bay_x+bay_w,base),fill=shadow)
+            d.line((bay_x,74,bay_x+bay_w,74),fill=edge,width=2)
+            d.line((bay_x+3,78,bay_x+3,base-2),fill=mix(t["cyan"],wall,.34),width=2)
+            for gy in range(82,base-3,7): d.line((bay_x+6,gy,bay_x+bay_w-3,gy),fill=mix(wall,t["moon"],.16))
+            d.rectangle((bay_x+bay_w+3,84,bay_x+bay_w+8,96),fill=rust)
+            d.line((bay_x+bay_w+5,78,bay_x+bay_w+5,83),fill=t["warm"],width=2)
+        elif chapter == 3:
+            # Arcade district: vertical light boxes, recessed glass columns and illuminated fins.
+            fin_x=x+rng.randint(6,max(7,bw-10))
+            d.rectangle((fin_x,top+8,fin_x+3,base-4),fill=shadow)
+            d.line((fin_x+1,top+10,fin_x+1,base-7),fill=districts["accent"],width=2)
+            d.point((fin_x+2,top+12),fill=t["moon"])
+            if bw>76:
+                glass_x=x+bw//2-8
+                d.rectangle((glass_x,78,glass_x+15,base-2),fill=shadow)
+                d.rectangle((glass_x+2,81,glass_x+13,base-5),fill=mix(t["cyan"],wall,.42))
+                d.line((glass_x+7,81,glass_x+7,base-5),fill=t["pink"])
+        elif chapter == 4:
+            # Garden quarter: timber gables, porch posts, planter boxes and climbing vines.
+            gx=x+bw//2
+            d.polygon([(gx-15,top+7),(gx,top-4),(gx+15,top+7)],fill=shadow)
+            d.line((gx-15,top+7,gx,top-4,gx+15,top+7),fill=edge,width=2)
+            d.rectangle((gx-12,top+8,gx+12,top+12),fill=mix(wall,t["moon"],.16))
+            for vx in (x+7,x+bw-9):
+                d.line((vx,top+24,vx-2,base-3),fill=(42,89,66),width=2)
+                for vy in range(top+31,base-8,11):
+                    d.ellipse((vx-4,vy-2,vx+2,vy+3),fill=(55,112,74))
+            d.rectangle((x+8,base-7,x+24,base-3),fill=(37,76,54))
+        else:
+            # Signal district: armored concrete plates, narrow observation slits and cable ducts.
+            for seam_y in (top+8,top+26,top+44):
+                if seam_y<base-4: d.line((x+4,seam_y,x+bw-4,seam_y),fill=shadow,width=2)
+            slit_x=x+bw//2-rng.randint(3,7)
+            d.rectangle((slit_x,top+13,slit_x+5,top+25),fill=shadow)
+            d.line((slit_x+2,top+15,slit_x+2,top+22),fill=t["cyan"])
+            d.line((x+bw-7,top+5,x+bw-7,base-4),fill=mix(wall,t["moon"],.18),width=2)
+            d.point((x+bw-7,top+4),fill=t["pink"])
         # Signs are unique per building in size, placement and neon hue.
         if rng.random()<profiles['sign']:
             sy=rng.randint(68,75); sx=x+rng.randint(8,max(9,bw-36))
