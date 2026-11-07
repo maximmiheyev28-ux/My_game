@@ -224,6 +224,9 @@ jobs:
           python3 -m py_compile tools/validate_pixel_art_quality.py
           python3 tools/validate_pixel_art_quality.py
 
+      - name: Remove all legacy visual assets from the playable build
+        run: python3 reset_visual_assets.py
+
 
       - name: Package restored project for visual overhaul
         run: |
