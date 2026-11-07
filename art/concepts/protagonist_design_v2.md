@@ -23,6 +23,10 @@ Develop a memorable side-view silhouette for the swordsman without copying an ex
 - All shapes and highlights are aligned to the pixel grid; no smoothing or antialiasing is used.
 - Inspected at native size, 4× nearest-neighbour enlargement and 0.55× gameplay-scale reduction. The scarf, coat silhouette, boots and blade remain identifiable at reduced size.
 
+## Source integrity
+
+The committed PNG blob SHA was verified against the locally inspected source bytes before the Git commit. This verifies file integrity only; it does not imply artistic approval.
+
 ## Open issues — do not treat as solved
 
 1. The weapon grip and overlapping forearms need another anatomy pass before animation.
