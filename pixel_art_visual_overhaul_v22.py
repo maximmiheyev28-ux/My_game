@@ -320,6 +320,8 @@ def draw_street_frontage(im, chapter, t):
         wall=rng.choice(districts["materials"])
         shadow=mix(wall,t["sky"],.48)
         edge=mix(wall,t["moon"],.24)
+        steel=mix(wall,t["moon"],.38)
+        rust=mix(wall,t["warm"],.52)
         # Individual roof silhouette: parapet, sloped cap, setback, or rooftop room.
         roof=rng.choice(profiles['roof'])
         if roof==0:
