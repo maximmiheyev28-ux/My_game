@@ -103,37 +103,4 @@ except Exception as exc:
 
 print(f"Restored {len(members)} project entries from {source_label}.")
 
-# Reassemble and verify the compressed visual/audio/gameplay generator.
-enhancement_dir = ROOT / ".source" / "enhance"
-enhancement_parts = sorted(enhancement_dir.glob("part-*.b64"))
-if enhancement_parts:
-    expected_parts = [f"part-{i:03d}.b64" for i in range(1, 8)]
-    present = {part.name for part in enhancement_parts}
-    missing = [name for name in expected_parts if name not in present]
-    if missing:
-        raise SystemExit("Enhancement generator incomplete. Missing: " + ", ".join(missing))
-    packed_text = "".join((enhancement_dir / name).read_text(encoding="ascii").strip() for name in expected_parts)
-    helper_bytes = gzip.decompress(base64.b64decode(packed_text, validate=True))
-    helper_sha256 = hashlib.sha256(helper_bytes).hexdigest()
-    if len(helper_bytes) != 101130 or helper_sha256 != "3900b793d6b5cd9ac6be277af118521035b567902d1beb4edd6fd80003b0fc13":
-        raise SystemExit("Enhancement generator checksum mismatch.")
-    helper_text = helper_bytes.decode("utf-8")
-    # GDScript uses % for integer remainder; // is not a GDScript operator.
-    helper_text = helper_text.replace("if (x//48)%2==0", "if (int(x / 48.0) % 2) == 0")
-    # Kinetic rain droplets have no faction flag; only reflected bullets use friendly.
-    old_debris_guard = """    if frozen or friendly or not is_inside_tree():
-        return
-    frozen = true
-    add_to_group("stasis_frozen")
-    stored_velocity = velocity
-    velocity = Vector2.ZERO
-    set_physics_process(false)
-    modulate = Color(0.52,0.92,1.0,1.0)"""
-    new_debris_guard = old_debris_guard.replace("if frozen or friendly or", "if frozen or")
-    if old_debris_guard not in helper_text:
-        raise SystemExit("Kinetic-debris guard patch target not found.")
-    helper_text = helper_text.replace(old_debris_guard, new_debris_guard, 1)
-    (ROOT / "enhance_project.py").write_text(helper_text, encoding="utf-8")
-    print(f"Restored visual/audio generator: {len(helper_bytes)} bytes; SHA-256 verified.")
-    print("Applied GDScript platform-renderer syntax fix.")
-
+print("No procedural art generator is restored or executed; project assets are supplied as authored files.")
