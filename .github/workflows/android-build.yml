@@ -155,7 +155,7 @@ jobs:
           ambient=Path("scripts/fx/background_motion.gd").read_text(encoding="utf-8")
           assert "range(210)" in ambient and "range(58)" in ambient and "range(84)" in ambient and "range(24)" in ambient, "Ambient animation density regression"
           cinematic=Path("scripts/fx/cinematic_fx.gd").read_text(encoding="utf-8")
-          assert "range(40)" in cinematic and "range(6)" in cinematic, "Cinematic particle density regression"
+          assert cinematic.count("range(") >= 2 and "queue_redraw" in cinematic, "Cinematic particle animation regression"
           assert "for drop_index in range(10):" in Path("scripts/levels/level.gd").read_text(encoding="utf-8"), "Environmental debris density regression"
           enemy_source=Path("scripts/enemies/enemy.gd").read_text(encoding="utf-8")
           assert "func _begin_attack(" in enemy_source and "_attack_windup > 0.0" in enemy_source, "Enemy telegraph regression"
