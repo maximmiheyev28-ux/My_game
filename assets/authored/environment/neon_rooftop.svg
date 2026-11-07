@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" shape-rendering="crispEdges">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#080d25"/><stop offset=".55" stop-color="#24234b"/><stop offset="1" stop-color="#111a35"/></linearGradient>
+ <linearGradient id="mist" x2="0" y2="1"><stop stop-color="#a044b5" stop-opacity="0"/><stop offset="1" stop-color="#4e4c9c" stop-opacity=".42"/></linearGradient>
+ <linearGradient id="water" x2="0" y2="1"><stop stop-color="#171a3a"/><stop offset="1" stop-color="#070b19"/></linearGradient>
+ <pattern id="windows" width="28" height="32" patternUnits="userSpaceOnUse"><rect x="5" y="5" width="7" height="13" fill="#47c9ee" opacity=".62"/><rect x="18" y="5" width="5" height="13" fill="#e35bd0" opacity=".55"/></pattern>
+ <pattern id="brick" width="24" height="14" patternUnits="userSpaceOnUse"><path d="M0 7H24M12 0V7M0 7V14" stroke="#28304d" stroke-width="2"/></pattern>
+</defs>
+<rect width="1280" height="720" fill="url(#sky)"/>
+<!-- cloud banks -->
+<path d="M0 150h90v-28h74v22h68v-35h80v24h55v-18h85v30h70v-20h80v27h75v-22h70v28h90v-20h80v28h90v-15h88v85H0Z" fill="#25284e" opacity=".72"/>
+<path d="M0 205h1280v170H0Z" fill="url(#mist)"/>
+<!-- moon -->
+<circle cx="965" cy="125" r="77" fill="#a9a2e9" opacity=".12"/><circle cx="965" cy="125" r="63" fill="#c7c0ef"/><path d="M922 92l20-9 10 12-8 13-20-3zm53-27 16 9-5 17-18-3zm-37 73 14-10 14 8-4 17-18 5zm49 26 21-8 8 16-14 13-16-7z" fill="#8f8ac1" opacity=".58"/>
+<!-- distant towers -->
+<g fill="#111a36" stroke="#28355f" stroke-width="3">
+<path d="M20 480V250h45v-75h62v305zM144 480V215h50v-58h68v323zM286 480V295h55v-140h38v-45h52v375zM450 480V220h42v-95h64v355zM578 480V265h55v-150h43v-60h37v425zM740 480V230h55v-88h44v-55h65v393zM922 480V265h45v-105h55v-75h50v395zM1085 480V210h55v-85h50v-40h60v395z"/>
+</g>
+<g opacity=".8" fill="url(#windows)"><path d="M25 250h90v220H25zM150 215h105v255H150zM295 160h125v310H295zM455 220h95v250h-95zM585 115h125v355H585zM750 230h80v240h-80zM930 160h120v310H930zM1095 125h180v345h-180z"/></g>
+<!-- central landmark tower -->
+<g stroke="#3c4777" stroke-width="4"><path d="M620 480V180h30V90h18V35h16v55h18v90h30v300z" fill="#10172f"/><path d="M640 180h72M636 205h80M644 235h64M650 260h54" stroke="#e34fbd" stroke-width="3"/><path d="M658 95h35v8h-35zM654 125h43v8h-43z" fill="#50c9ed" stroke="none"/></g>
+<!-- elevated rail, physically anchored -->
+<path d="M0 425H1280v30H0z" fill="#080f25" stroke="#465078" stroke-width="4"/><path d="M0 454H1280v8H0z" fill="#d24cae" opacity=".65"/>
+<g fill="#111a32" stroke="#394365" stroke-width="4"><path d="M95 455v95h22v-95zM410 455v95h22v-95zM810 455v95h22v-95zM1160 455v95h22v-95z"/></g>
+<!-- near architecture left -->
+<g><path d="M0 370h310v185H0z" fill="#0b1024" stroke="#303451" stroke-width="6"/><path d="M-15 365l110-88 230 70v24H-15z" fill="#17182e" stroke="#45405f" stroke-width="7"/><path d="M0 390h310v165H0z" fill="url(#brick)" opacity=".7"/><path d="M36 420h72v94H36zM145 405h90v110h-90z" fill="#ff6b4c" opacity=".16" stroke="#864a62" stroke-width="5"/><path d="M45 431h55v7H45zM154 420h72v8h-72z" fill="#ffb16c"/><path d="M250 390h36v72h-36z" fill="#14152b" stroke="#bd438e" stroke-width="4"/><path d="M256 401h24v8h-24zM256 419h24v8h-24zM256 437h24v8h-24z" fill="#ff477f"/></g>
+<!-- pagoda right -->
+<g stroke="#41436d" stroke-width="5"><path d="M1000 410h220v145h-220z" fill="#0a1025"/><path d="M970 410l70-45h140l70 45-24 8h-232z" fill="#19172f"/><path d="M1010 365l48-34h112l48 34-20 8h-168z" fill="#211832"/><path d="M1050 331l32-27h64l32 27-12 7h-104z" fill="#2c1c3e"/><path d="M1108 304v-40h12v40" fill="#a53e86" stroke="none"/></g>
+<g fill="#ff6b85"><path d="M1020 430h15v28h-15zM1050 430h15v28h-15zM1080 430h15v28h-15zM1110 430h15v28h-15zM1140 430h15v28h-15zM1170 430h15v28h-15z" opacity=".8"/></g>
+<!-- neon signs -->
+<g font-family="monospace" font-weight="bold"><rect x="320" y="310" width="52" height="120" fill="#15132c" stroke="#dc4ac9" stroke-width="4"/><text x="346" y="345" font-size="24" fill="#ff6de3" text-anchor="middle">東</text><text x="346" y="380" font-size="24" fill="#ff6de3" text-anchor="middle">京</text><rect x="850" y="300" width="90" height="34" fill="#10152c" stroke="#4bd9f5" stroke-width="3"/><text x="895" y="323" font-size="16" fill="#71eaff" text-anchor="middle">LAST SIGNAL</text></g>
+<!-- foreground rooftop / continuous platform -->
+<path d="M0 556H1280v164H0z" fill="#090e20"/><path d="M0 556H1280v14H0z" fill="#303552"/><path d="M0 570H1280v7H0z" fill="#f04b9e" opacity=".55"/>
+<path d="M0 588h1280v132H0z" fill="url(#water)"/><g opacity=".7"><path d="M40 600h190v3H40zM300 622h145v4H300zM500 590h230v3H500zM800 645h180v4H800zM1040 608h180v3h-180z" fill="#e85ac7"/><path d="M120 652h100v3H120zM430 675h170v3H430zM720 614h120v3H720zM990 685h160v3H990z" fill="#54c9ed"/></g>
+<!-- cables and rain -->
+<path d="M0 95Q300 145 610 100T1280 112M0 135Q350 178 720 145T1280 160" fill="none" stroke="#090e20" stroke-width="7"/>
+<g stroke="#8eb7ed" stroke-opacity=".28" stroke-width="2"><path d="M90 0l-45 160M210 0l-48 190M500 0l-40 145M710 0l-52 180M850 0l-42 160M1180 0l-44 175M1260 0l-38 160"/></g>
+</svg>
