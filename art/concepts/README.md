@@ -1,9 +1,12 @@
 # Character design studies
 
-## Protagonist — first silhouette and costume study
+## Protagonist — current study
 
-`protagonist_design_v1.png` is a manually composed 96×112 transparent pixel-art concept, drawn as deliberate pixel clusters rather than generated from geometric primitives. It explores a right-facing swordsman silhouette, swept dark hair, a vermilion scarf, layered blue-black long coat, grounded boots, and a cold steel katana with restrained cyan rim light.
+- [Design study v2](protagonist_design_v2.md)
+- [PNG artwork](protagonist_design_v2.png)
 
-### Status
+The v2 study supersedes the initial v1 exploration as the current working direction, but it is **not approved for production** and is not wired into gameplay. The character is being designed as a complete illustration first; animation and integration must wait for silhouette, anatomy, face, clothing construction and weapon handling to pass review.
 
-This is a **design exploration**, not an approved production sprite and not yet wired into gameplay. The proportions, face readability, hand/weapon grip, coat folds, and silhouette at native gameplay scale still need review. Do not promote it to the runtime atlas or duplicate it across animation frames. Next pass should refine the silhouette and anatomy, then create distinct key poses from the approved design.
+## Earlier exploration
+
+[Protagonist design v1](protagonist_design_v1.png) is retained as history only. It is not a production asset.
